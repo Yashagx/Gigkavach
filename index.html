@@ -2,1713 +2,979 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>GigKavach — Protecting Every Ride</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --navy: #1a2c5b;
-    --navy-dark: #0f1c3d;
-    --blue: #2563eb;
-    --blue-light: #3b82f6;
-    --green: #22c55e;
-    --green-dark: #16a34a;
-    --green-kavach: #4ade80;
-    --amber: #f59e0b;
-    --red: #ef4444;
-    --orange: #f97316;
-    --bg: #f0f4ff;
-    --card: #ffffff;
-    --text: #0f172a;
-    --text-muted: #64748b;
-    --border: #e2e8f0;
-    --sidebar-w: 240px;
-  }
+:root {
+  --navy:#1a2c5b; --navy-dark:#0f1c3d;
+  --blue:#2563eb; --blue-light:#3b82f6;
+  --green:#22c55e; --green-dark:#16a34a; --green-k:#4ade80;
+  --amber:#f59e0b; --red:#ef4444;
+  --bg:#f0f4ff; --card:#ffffff;
+  --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+  --bottom-h:64px; --topbar-h:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);overscroll-behavior:none}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* TOPBAR */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:var(--topbar-h);
+  background:var(--navy-dark);
+  display:flex;align-items:center;padding:0 12px;gap:10px;
+  box-shadow:0 2px 12px rgba(0,0,0,.3);
+}
+.menu-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,.1);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;color:#fff;flex-shrink:0;
+}
+.topbar-center{flex:1;min-width:0}
+.topbar-title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-sub{font-size:10px;color:rgba(255,255,255,.45)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.weather-pill{padding:4px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.weather-pill.safe{background:rgba(34,197,94,.2);color:#4ade80}
+.weather-pill.moderate{background:rgba(245,158,11,.2);color:#fbbf24}
+.weather-pill.danger{background:rgba(239,68,68,.2);color:#fca5a5}
+.notif-btn{
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;cursor:pointer;position:relative;
+}
+.notif-dot{position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--navy-dark)}
 
-  body {
-    font-family: 'Space Grotesk', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* DRAWER OVERLAY */
+.drawer-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.55);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.drawer-overlay.open{opacity:1;pointer-events:all}
 
-  /* ── LAYOUT ── */
-  .app { display: flex; min-height: 100vh; }
+/* DRAWER */
+.drawer{
+  position:fixed;top:0;left:0;bottom:0;z-index:310;
+  width:min(290px,85vw);
+  background:var(--navy-dark);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
+.drawer.open{transform:translateX(0)}
 
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: var(--sidebar-w);
-    background: var(--navy-dark);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 100;
-    transition: transform .3s;
-  }
+.drawer-header{
+  padding:16px;border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.drawer-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+.drawer-logo .g{color:#60a5fa}.drawer-logo .k{color:#4ade80}
+.drawer-tagline{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.drawer-close{
+  width:30px;height:30px;border-radius:8px;
+  background:rgba(255,255,255,.08);border:none;
+  color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
 
-  .sidebar-logo {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-  .sidebar-logo img { height: 44px; }
-  .sidebar-tagline {
-    font-size: 10px;
-    color: rgba(255,255,255,.4);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
+/* PERSONA */
+.persona-card{
+  margin:10px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;
+}
+.persona-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.persona-avatar{
+  width:46px;height:46px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--blue-light),var(--green));
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  position:relative;
+}
+.persona-online{
+  position:absolute;bottom:1px;right:1px;
+  width:10px;height:10px;background:var(--green);
+  border-radius:50%;border:2px solid var(--navy-dark);
+  animation:onlinePulse 2s infinite;
+}
+@keyframes onlinePulse{0%,100%{opacity:1}50%{opacity:.4}}
+.persona-name{font-size:14px;font-weight:700;color:#fff}
+.persona-handle{font-size:11px;color:rgba(255,255,255,.45)}
+.persona-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 7px;border-radius:20px;margin-top:2px;
+  font-size:9px;font-weight:700;
+  background:rgba(34,197,94,.2);color:var(--green-k);
+}
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.persona-item{background:rgba(255,255,255,.05);border-radius:8px;padding:6px 8px}
+.persona-item-label{font-size:9px;color:rgba(255,255,255,.4);margin-bottom:1px}
+.persona-item-val{font-size:11px;font-weight:600;color:#fff}
+.persona-full{background:rgba(255,255,255,.05);border-radius:8px;padding:8px;margin-bottom:8px}
+.persona-row{display:flex;justify-content:space-between;padding:3px 0;font-size:11px;border-bottom:1px solid rgba(255,255,255,.06)}
+.persona-row:last-child{border-bottom:none}
+.persona-row .pl{color:rgba(255,255,255,.45)}
+.persona-row .pr{color:#fff;font-weight:600;text-align:right;max-width:55%}
 
-  .sidebar-section {
-    padding: 14px 12px 4px;
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.3);
-  }
+.drawer-section{padding:10px 12px 4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;margin:2px 8px;
+  border-radius:10px;cursor:pointer;
+  font-size:13px;font-weight:500;color:rgba(255,255,255,.65);
+  transition:all .2s;
+}
+.nav-item:active{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:linear-gradient(135deg,var(--blue),#1d4ed8);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.nav-icon{font-size:17px;flex-shrink:0}
+.nav-badge{margin-left:auto;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:var(--green);color:#fff}
+.nav-badge.red{background:var(--red)}
+.nav-badge.amber{background:var(--amber)}
 
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    margin: 2px 8px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    color: rgba(255,255,255,.6);
-    transition: all .2s;
-    position: relative;
-  }
-  .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
-  .nav-item.active {
-    background: linear-gradient(135deg, var(--blue), #1d4ed8);
-    color: #fff;
-    box-shadow: 0 4px 16px rgba(37,99,235,.4);
-  }
-  .nav-item .icon { font-size: 17px; }
-  .nav-badge {
-    margin-left: auto;
-    background: var(--green);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 20px;
-  }
-  .nav-badge.red { background: var(--red); }
-  .nav-badge.amber { background: var(--amber); }
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  height:var(--bottom-h);
+  background:var(--navy-dark);
+  display:flex;
+  border-top:1px solid rgba(255,255,255,.08);
+  box-shadow:0 -4px 20px rgba(0,0,0,.2);
+}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;
+  cursor:pointer;border:none;background:none;
+  padding:8px 4px;color:rgba(255,255,255,.4);
+  position:relative;transition:color .2s;
+}
+.bnav-item.active{color:#fff}
+.bnav-item.active::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;
+  height:2px;background:linear-gradient(90deg,var(--blue-light),var(--green-k));
+  border-radius:0 0 4px 4px;
+}
+.bnav-icon{font-size:19px;line-height:1}
+.bnav-label{font-size:9px;font-weight:600}
+.bnav-dot{position:absolute;top:8px;right:calc(50% - 14px);width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--navy-dark)}
 
-  .sidebar-footer {
-    margin-top: auto;
-    padding: 16px;
-    border-top: 1px solid rgba(255,255,255,.08);
-  }
-  .rider-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    background: rgba(255,255,255,.06);
-    border-radius: 12px;
-  }
-  .rider-avatar {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue-light), var(--green));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .rider-name { font-size: 13px; font-weight: 600; color: #fff; }
-  .rider-zone { font-size: 11px; color: rgba(255,255,255,.4); }
-  .online-dot {
-    width: 8px; height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    margin-left: auto;
-    box-shadow: 0 0 6px var(--green);
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50% { opacity: .4; }
-  }
+/* MAIN */
+.main{padding-top:var(--topbar-h);padding-bottom:calc(var(--bottom-h)+8px);min-height:100vh}
+.content{padding:12px 12px 0}
 
-  /* ── MAIN ── */
-  .main {
-    margin-left: var(--sidebar-w);
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp .28s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-  .topbar {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: sticky; top: 0;
-    z-index: 50;
-    box-shadow: 0 1px 8px rgba(0,0,0,.06);
-  }
-  .topbar-title { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; }
-  .topbar-sub { font-size: 12px; color: var(--text-muted); }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+/* GRID — 2-col mobile, expand on desktop */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.grid-1{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+.row{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.col-2,.col-1{flex:1}
+@media(min-width:640px){
+  .row{flex-direction:row}
+  .col-2{flex:2}
+  .grid-4-desktop{grid-template-columns:repeat(4,1fr)}
+  .grid-3-desktop{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:960px){
+  .content{padding:20px 24px 0}
+  .drawer{transform:translateX(0)!important}
+  .drawer-overlay{display:none!important}
+  .main{margin-left:min(290px,85vw)}
+  .topbar{left:min(290px,85vw)}
+  .bottom-nav{left:min(290px,85vw)}
+  .menu-btn{display:none}
+}
 
-  .weather-badge {
-    display: flex; align-items: center; gap: 6px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .weather-badge.safe { background: #dcfce7; color: #15803d; }
-  .weather-badge.moderate { background: #fef9c3; color: #92400e; }
-  .weather-badge.danger { background: #fee2e2; color: #991b1b; }
+/* CARD */
+.card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1px solid var(--border);margin-bottom:12px}
+.card-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
 
-  .notif-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    position: relative;
-  }
-  .notif-dot {
-    position: absolute; top: 4px; right: 4px;
-    width: 8px; height: 8px;
-    background: var(--red);
-    border-radius: 50%;
-    border: 2px solid #fff;
-  }
+/* STAT CARD */
+.stat-card{background:var(--card);border-radius:14px;padding:12px;border:1px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.navy::before{background:var(--navy)}
+.stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:7px}
+.stat-icon.blue{background:#dbeafe}.stat-icon.green{background:#dcfce7}.stat-icon.amber{background:#fef3c7}.stat-icon.navy{background:#e0e7ff}
+.stat-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;line-height:1;margin-bottom:2px}
+.stat-label{font-size:10px;color:var(--muted)}
+.stat-change{font-size:10px;font-weight:600;margin-top:5px;display:inline-flex;align-items:center;gap:2px;padding:2px 6px;border-radius:20px}
+.stat-change.up{background:#dcfce7;color:#15803d}
+.stat-change.down{background:#fee2e2;color:#991b1b}
 
-  /* ── CONTENT ── */
-  .content { padding: 24px 28px; flex: 1; }
+/* HERO */
+.insurance-hero{background:linear-gradient(135deg,var(--navy-dark),var(--navy));border-radius:16px;padding:18px;color:#fff;position:relative;overflow:hidden;margin-bottom:12px}
+.insurance-hero::before{content:'🛡️';position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:56px;opacity:.1}
+.ins-status{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,.2);border:1px solid rgba(34,197,94,.3);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;color:var(--green-k);margin-bottom:8px}
+.ins-amount{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;margin-bottom:2px}
+.ins-subtitle{font-size:10px;opacity:.7;margin-bottom:12px}
+.ins-bar{background:rgba(255,255,255,.15);border-radius:8px;height:6px;margin-bottom:5px}
+.ins-bar-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),#86efac)}
+.ins-bar-label{display:flex;justify-content:space-between;font-size:10px;opacity:.7}
 
-  /* ── PANELS ── */
-  .panel { display: none; }
-  .panel.active { display: block; animation: fadeIn .3s ease; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+.payout-hero{background:linear-gradient(135deg,#065f46,#047857);border-radius:16px;padding:20px;color:#fff;text-align:center;position:relative;overflow:hidden;margin-bottom:12px}
+.payout-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:80px;height:80px;background:rgba(255,255,255,.07);border-radius:50%}
+.payout-amount{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;margin:6px 0}
+.payout-tag{font-size:10px;opacity:.7}
 
-  /* ── GRID ── */
-  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 20px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .grid-1 { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px; }
+.savings-pool{background:linear-gradient(135deg,#1e40af,#1d4ed8);border-radius:14px;padding:16px;color:#fff;margin-bottom:12px}
+.pool-amount{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin:4px 0}
 
-  /* ── CARDS ── */
-  .card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 1px 8px rgba(0,0,0,.06);
-    border: 1px solid var(--border);
-    transition: box-shadow .2s;
-  }
-  .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.1); }
-  .card-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-bottom: 12px;
-    display: flex; align-items: center; gap: 6px;
-  }
+/* MISC */
+.chip{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.chip.blue{background:#dbeafe;color:#1e40af}
+.chip.green{background:#dcfce7;color:#15803d}
+.chip.red{background:#fee2e2;color:#991b1b}
+.chip.amber{background:#fef3c7;color:#92400e}
+.chip.purple{background:#ede9fe;color:#5b21b6}
+.chip.white{background:rgba(255,255,255,.15);color:#fff}
 
-  /* ── STAT CARDS ── */
-  .stat-card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: 16px 16px 0 0;
-  }
-  .stat-card.blue::before { background: var(--blue); }
-  .stat-card.green::before { background: var(--green); }
-  .stat-card.amber::before { background: var(--amber); }
-  .stat-card.navy::before { background: var(--navy); }
+.btn{padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-block{width:100%;display:block;text-align:center}
 
-  .stat-icon {
-    width: 44px; height: 44px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    margin-bottom: 12px;
-  }
-  .stat-icon.blue { background: #dbeafe; }
-  .stat-icon.green { background: #dcfce7; }
-  .stat-icon.amber { background: #fef3c7; }
-  .stat-icon.navy { background: #e0e7ff; }
+.alert{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:12px;font-weight:500}
+.alert.info{background:#dbeafe;color:#1e40af}
+.alert.warning{background:#fef3c7;color:#92400e}
+.alert.success{background:#dcfce7;color:#15803d}
+.alert.danger{background:#fee2e2;color:#991b1b}
+.alert-icon{font-size:17px;flex-shrink:0;margin-top:1px}
+.alert-time{margin-left:auto;font-size:10px;opacity:.7;flex-shrink:0}
 
-  .stat-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .stat-label { font-size: 12px; color: var(--text-muted); }
-  .stat-change {
-    font-size: 11px;
-    font-weight: 600;
-    margin-top: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 2px 8px;
-    border-radius: 20px;
-  }
-  .stat-change.up { background: #dcfce7; color: #15803d; }
-  .stat-change.down { background: #fee2e2; color: #991b1b; }
+.divider{height:1px;background:var(--border);margin:10px 0}
+.text-sm{font-size:11px;color:var(--muted)}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800}
 
-  /* ── ZONE MAP ── */
-  .zone-map {
-    width: 100%;
-    height: 320px;
-    border-radius: 14px;
-    overflow: hidden;
-    position: relative;
-    background: #1a2c5b;
-  }
-  .map-grid {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: repeat(8,1fr);
-    grid-template-rows: repeat(6,1fr);
-    gap: 2px;
-    padding: 2px;
-  }
-  .map-cell {
-    border-radius: 4px;
-    opacity: .7;
-    transition: all .3s;
-    cursor: pointer;
-    position: relative;
-  }
-  .map-cell:hover { opacity: 1; transform: scale(1.05); z-index: 2; }
-  .map-cell.safe { background: #22c55e; }
-  .map-cell.moderate { background: #f59e0b; }
-  .map-cell.danger { background: #ef4444; }
-  .map-cell.extreme { background: #7c3aed; animation: flicker .8s infinite; }
-  @keyframes flicker { 0%,100%{opacity:.7} 50%{opacity:1} }
+.live-indicator{display:inline-flex;align-items:center;gap:5px;background:#fee2e2;color:#991b1b;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.live-dot{width:6px;height:6px;background:var(--red);border-radius:50%;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-  .map-overlay {
-    position: absolute;
-    top: 12px; right: 12px;
-    background: rgba(0,0,0,.7);
-    border-radius: 10px;
-    padding: 10px 14px;
-    backdrop-filter: blur(8px);
-  }
-  .map-legend-item {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: #fff;
-    margin-bottom: 4px;
-  }
-  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:4px 0}
+.progress-fill{height:100%;border-radius:3px;transition:width 1s ease}
 
-  .rider-pin {
-    position: absolute;
-    font-size: 22px;
-    transform: translate(-50%,-50%);
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
-    animation: bounce 2s infinite;
-    z-index: 5;
-  }
-  @keyframes bounce {
-    0%,100%{transform:translate(-50%,-50%)} 50%{transform:translate(-50%,-60%)}
-  }
+.ai-card{background:linear-gradient(135deg,#f0f4ff,#e8edff);border:1.5px solid #c7d2fe;border-radius:12px;padding:12px;margin-bottom:10px}
+.ai-header{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ai-tag{background:#6366f1;color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.04em}
+.ai-text{font-size:12px;line-height:1.55}
 
-  .map-info-bar {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: rgba(10,20,50,.85);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    backdrop-filter: blur(6px);
-  }
-  .map-zone-name { font-size: 13px; font-weight: 700; color: #fff; }
-  .map-zone-detail { font-size: 11px; color: rgba(255,255,255,.6); }
+.claim-timeline{display:flex;flex-direction:column}
+.claim-step{display:flex;align-items:flex-start;gap:12px;padding-bottom:14px;position:relative}
+.claim-step:not(:last-child)::after{content:'';position:absolute;left:14px;top:30px;bottom:0;width:2px;background:var(--border)}
+.claim-step.done::after{background:var(--green)}
+.claim-dot{width:28px;height:28px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;position:relative;z-index:1}
+.claim-dot.done{background:var(--green)}
+.claim-dot.active{background:var(--blue);animation:ripple 1.5s infinite}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}70%{box-shadow:0 0 0 10px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.claim-info{padding-top:3px}
+.claim-step-title{font-size:12px;font-weight:600;margin-bottom:1px}
+.claim-step-time{font-size:10px;color:var(--muted)}
 
-  /* ── RISK GAUGE ── */
-  .risk-gauge {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 0;
-  }
-  .gauge-arc {
-    width: 160px;
-    height: 80px;
-    position: relative;
-  }
-  .gauge-arc svg { width: 100%; height: 100%; }
-  .gauge-val {
-    font-family: 'Syne', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    margin-top: 4px;
-  }
-  .gauge-label { font-size: 12px; color: var(--text-muted); }
+/* MAP */
+.zone-map{width:100%;height:220px;border-radius:12px;overflow:hidden;position:relative;background:#1a2c5b}
+.map-grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(6,1fr);gap:2px;padding:2px}
+.map-cell{border-radius:3px;opacity:.75;cursor:pointer;transition:opacity .25s}
+.map-cell:active{opacity:1}
+.map-cell.safe{background:#22c55e}
+.map-cell.moderate{background:#f59e0b}
+.map-cell.danger{background:#ef4444}
+.map-cell.extreme{background:#7c3aed;animation:flicker .8s infinite}
+@keyframes flicker{0%,100%{opacity:.7}50%{opacity:1}}
+.rider-pin{position:absolute;font-size:18px;transform:translate(-50%,-50%);filter:drop-shadow(0 2px 5px rgba(0,0,0,.5));animation:bounce 2s infinite;z-index:5}
+@keyframes bounce{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-62%)}}
+.map-overlay{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.72);border-radius:8px;padding:7px 9px;backdrop-filter:blur(6px)}
+.map-legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#fff;margin-bottom:2px}
+.legend-dot{width:8px;height:8px;border-radius:2px}
+.map-info-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(10,20,50,.85);padding:8px 10px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(5px)}
+.map-zone-name{font-size:12px;font-weight:700;color:#fff}
+.map-zone-detail{font-size:10px;color:rgba(255,255,255,.55)}
 
-  /* ── INSURANCE CARD ── */
-  .insurance-hero {
-    background: linear-gradient(135deg, var(--navy-dark), var(--navy));
-    border-radius: 20px;
-    padding: 28px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .insurance-hero::before {
-    content: '🛡️';
-    position: absolute;
-    right: 20px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 80px;
-    opacity: .12;
-  }
-  .ins-status {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(34,197,94,.2);
-    border: 1px solid rgba(34,197,94,.3);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--green-kavach);
-    margin-bottom: 12px;
-  }
-  .ins-amount {
-    font-family: 'Syne', sans-serif;
-    font-size: 42px;
-    font-weight: 800;
-    margin-bottom: 4px;
-  }
-  .ins-subtitle { font-size: 13px; opacity: .7; margin-bottom: 20px; }
-  .ins-bar {
-    background: rgba(255,255,255,.15);
-    border-radius: 8px;
-    height: 8px;
-    margin-bottom: 8px;
-  }
-  .ins-bar-fill {
-    height: 100%;
-    border-radius: 8px;
-    background: linear-gradient(90deg, var(--green), #86efac);
-    transition: width 1s ease;
-  }
-  .ins-bar-label {
-    display: flex; justify-content: space-between;
-    font-size: 11px; opacity: .7;
-  }
+/* CHART */
+.earnings-chart{height:90px;display:flex;align-items:flex-end;gap:4px;padding:0 2px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:5px;cursor:pointer;transition:filter .2s}
+.bar.normal{background:linear-gradient(180deg,var(--blue-light),var(--blue))}
+.bar.protected{background:linear-gradient(180deg,var(--green),var(--green-dark))}
+.bar.disruption{background:linear-gradient(180deg,var(--amber),#d97706)}
+.bar-day{font-size:9px;color:var(--muted)}
 
-  /* ── CLAIM STATUS ── */
-  .claim-timeline {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-  .claim-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding-bottom: 20px;
-    position: relative;
-  }
-  .claim-step:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    left: 17px; top: 36px; bottom: 0;
-    width: 2px;
-    background: var(--border);
-  }
-  .claim-step.done::after { background: var(--green); }
-  .claim-dot {
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    background: var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-  }
-  .claim-dot.done { background: var(--green); }
-  .claim-dot.active { background: var(--blue); animation: ripple 1.5s infinite; }
-  @keyframes ripple {
-    0%{box-shadow:0 0 0 0 rgba(37,99,235,.5)}
-    70%{box-shadow:0 0 0 12px rgba(37,99,235,0)}
-    100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}
-  }
-  .claim-info { padding-top: 6px; }
-  .claim-step-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-  .claim-step-time { font-size: 11px; color: var(--text-muted); }
+/* TRUST RING */
+.trust-ring{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(#22c55e 0deg 324deg,#e2e8f0 324deg 360deg);margin:0 auto 10px}
+.trust-inner{width:66px;height:66px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.trust-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--green-dark)}
+.trust-sub{font-size:8px;color:var(--muted)}
 
-  /* ── PAYOUT CARD ── */
-  .payout-hero {
-    background: linear-gradient(135deg, #065f46, #047857);
-    border-radius: 20px;
-    padding: 24px;
-    color: white;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .payout-hero::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 120px; height: 120px;
-    background: rgba(255,255,255,.08);
-    border-radius: 50%;
-  }
-  .payout-amount {
-    font-family: 'Syne', sans-serif;
-    font-size: 48px;
-    font-weight: 800;
-    margin: 8px 0;
-  }
-  .payout-tag { font-size: 11px; opacity: .7; }
+/* TABLE */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.order-table{width:100%;border-collapse:collapse;min-width:460px}
+.order-table th{text-align:left;padding:7px 9px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--border)}
+.order-table td{padding:8px 9px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.order-table tr:last-child td{border-bottom:none}
+.rec-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:20px;font-size:10px;font-weight:700}
+.rec-badge.hot{background:#dcfce7;color:#15803d}
+.rec-badge.ok{background:#fef9c3;color:#92400e}
+.rec-badge.skip{background:#fee2e2;color:#991b1b}
 
-  /* ── SAVINGS ── */
-  .savings-pool {
-    background: linear-gradient(135deg, #1e40af, #1d4ed8);
-    border-radius: 16px;
-    padding: 20px;
-    color: white;
-    margin-bottom: 16px;
-  }
-  .pool-amount {
-    font-family: 'Syne', sans-serif;
-    font-size: 36px;
-    font-weight: 800;
-    margin: 6px 0;
-  }
+/* FORECAST */
+.forecast-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.forecast-row:last-child{border-bottom:none}
+.forecast-day{font-size:11px;font-weight:600;width:36px}
+.forecast-bar-wrap{flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.forecast-bar{height:100%;border-radius:3px}
+.forecast-prob{font-size:11px;font-weight:700;width:34px;text-align:right}
 
-  /* ── FRAUD SCORE ── */
-  .trust-ring {
-    width: 100px; height: 100px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-    background: conic-gradient(#22c55e 0deg 324deg, #e2e8f0 324deg 360deg);
-    position: relative;
-    margin: 0 auto 12px;
-  }
-  .trust-inner {
-    width: 76px; height: 76px;
-    border-radius: 50%;
-    background: white;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-  }
-  .trust-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--green-dark); }
-  .trust-sub { font-size: 9px; color: var(--text-muted); }
+/* CASHBACK */
+.cashback-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.cashback-row:last-child{border-bottom:none}
+.cashback-icon{font-size:20px;flex-shrink:0}
+.cashback-info{flex:1;min-width:0}
+.cashback-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cashback-date{font-size:10px;color:var(--muted)}
+.cashback-amt{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--green-dark);flex-shrink:0}
 
-  /* ── ALERTS ── */
-  .alert {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    font-weight: 500;
-  }
-  .alert.info { background: #dbeafe; color: #1e40af; }
-  .alert.warning { background: #fef3c7; color: #92400e; }
-  .alert.success { background: #dcfce7; color: #15803d; }
-  .alert.danger { background: #fee2e2; color: #991b1b; }
-  .alert-icon { font-size: 20px; }
-  .alert-time { margin-left: auto; font-size: 11px; opacity: .7; }
+/* VOICE FAB */
+.voice-fab{
+  position:fixed;bottom:calc(var(--bottom-h)+12px);right:12px;
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),#6366f1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;cursor:pointer;
+  box-shadow:0 5px 18px rgba(99,102,241,.5);
+  transition:all .2s;z-index:190;border:none;
+}
+.voice-fab:active{transform:scale(.92)}
+.voice-fab.listening{animation:voicePulse 1s infinite;background:linear-gradient(135deg,var(--red),#f97316)}
+@keyframes voicePulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.7)}70%{box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.voice-tooltip{
+  position:fixed;bottom:calc(var(--bottom-h)+68px);right:10px;
+  background:var(--navy-dark);color:#fff;
+  padding:10px 13px;border-radius:12px;font-size:12px;
+  display:none;max-width:200px;
+  box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:190;
+}
+.voice-tooltip.show{display:block;animation:fadeUp .2s ease}
+.voice-lang{margin-top:6px;display:flex;gap:5px;flex-wrap:wrap}
+.lang-chip{padding:2px 7px;border-radius:20px;font-size:10px;background:rgba(255,255,255,.15);cursor:pointer}
+.lang-chip.active{background:var(--blue)}
 
-  /* ── ORDER TABLE ── */
-  .order-table { width: 100%; border-collapse: collapse; }
-  .order-table th {
-    text-align: left;
-    padding: 8px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--text-muted);
-    border-bottom: 2px solid var(--border);
-  }
-  .order-table td {
-    padding: 10px 12px;
-    font-size: 13px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
-  .order-table tr:last-child td { border-bottom: none; }
+/* NOTIF */
+.notif-panel{
+  position:fixed;top:calc(var(--topbar-h)+6px);right:8px;
+  width:min(300px,calc(100vw - 16px));z-index:250;display:none;
+}
+.notif-panel.show{display:block;animation:fadeUp .2s ease}
 
-  .rec-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .rec-badge.hot { background: #dcfce7; color: #15803d; }
-  .rec-badge.ok { background: #fef9c3; color: #92400e; }
-  .rec-badge.skip { background: #fee2e2; color: #991b1b; }
-
-  /* ── EARNINGS CHART ── */
-  .earnings-chart {
-    height: 120px;
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-    padding: 0 4px;
-  }
-  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .bar {
-    width: 100%;
-    border-radius: 6px 6px 0 0;
-    min-height: 8px;
-    position: relative;
-    cursor: pointer;
-    transition: filter .2s;
-  }
-  .bar:hover { filter: brightness(1.15); }
-  .bar.normal { background: linear-gradient(180deg, var(--blue-light), var(--blue)); }
-  .bar.protected { background: linear-gradient(180deg, var(--green), var(--green-dark)); }
-  .bar.disruption { background: linear-gradient(180deg, var(--amber), #d97706); }
-  .bar-day { font-size: 10px; color: var(--text-muted); }
-
-  /* ── CHIP ── */
-  .chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .chip.blue { background: #dbeafe; color: #1e40af; }
-  .chip.green { background: #dcfce7; color: #15803d; }
-  .chip.red { background: #fee2e2; color: #991b1b; }
-  .chip.amber { background: #fef3c7; color: #92400e; }
-  .chip.purple { background: #ede9fe; color: #5b21b6; }
-
-  /* ── BUTTON ── */
-  .btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: 'Space Grotesk', sans-serif;
-    cursor: pointer;
-    border: none;
-    transition: all .2s;
-  }
-  .btn-primary { background: var(--blue); color: white; }
-  .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(37,99,235,.4); }
-  .btn-green { background: var(--green); color: white; }
-  .btn-green:hover { background: var(--green-dark); }
-  .btn-ghost { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--border); }
-  .btn-sm { padding: 6px 14px; font-size: 12px; }
-
-  /* ── SECTION HEADER ── */
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-  }
-
-  /* ── DISRUPTION METER ── */
-  .disruption-meter {
-    display: flex;
-    gap: 4px;
-    margin: 8px 0;
-  }
-  .meter-seg {
-    flex: 1;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--border);
-  }
-  .meter-seg.filled { background: var(--red); }
-  .meter-seg.partial { background: var(--amber); }
-
-  /* ── VOICE ASSISTANT ── */
-  .voice-fab {
-    position: fixed;
-    bottom: 24px; right: 24px;
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--blue), #6366f1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(99,102,241,.5);
-    transition: all .2s;
-    z-index: 200;
-    border: none;
-  }
-  .voice-fab:hover { transform: scale(1.1); }
-  .voice-fab.listening {
-    animation: voicePulse 1s infinite;
-    background: linear-gradient(135deg, var(--red), #f97316);
-  }
-  @keyframes voicePulse {
-    0%{box-shadow:0 0 0 0 rgba(239,68,68,.7)}
-    70%{box-shadow:0 0 0 16px rgba(239,68,68,0)}
-    100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}
-  }
-
-  .voice-tooltip {
-    position: fixed;
-    bottom: 90px; right: 16px;
-    background: var(--navy-dark);
-    color: white;
-    padding: 10px 16px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 500;
-    display: none;
-    max-width: 240px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  }
-  .voice-tooltip.show { display: block; animation: fadeIn .2s ease; }
-  .voice-lang { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
-  .lang-chip {
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    background: rgba(255,255,255,.15);
-    cursor: pointer;
-  }
-  .lang-chip.active { background: var(--blue); }
-
-  /* ── FORECAST CARD ── */
-  .forecast-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .forecast-row:last-child { border-bottom: none; }
-  .forecast-day { font-size: 12px; font-weight: 600; width: 40px; }
-  .forecast-bar-wrap { flex: 1; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
-  .forecast-bar { height: 100%; border-radius: 4px; }
-  .forecast-prob { font-size: 12px; font-weight: 700; width: 40px; text-align: right; }
-
-  /* ── CASHBACK ── */
-  .cashback-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0; border-bottom: 1px solid var(--border);
-  }
-  .cashback-row:last-child { border-bottom: none; }
-  .cashback-icon { font-size: 22px; }
-  .cashback-info { flex: 1; }
-  .cashback-title { font-size: 13px; font-weight: 600; }
-  .cashback-date { font-size: 11px; color: var(--text-muted); }
-  .cashback-amt { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--green-dark); }
-
-  /* ── AI INSIGHT ── */
-  .ai-card {
-    background: linear-gradient(135deg, #f0f4ff, #e8edff);
-    border: 1.5px solid #c7d2fe;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .ai-tag {
-    background: #6366f1;
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 20px;
-    letter-spacing: .05em;
-  }
-  .ai-text { font-size: 13px; line-height: 1.5; }
-
-  /* ── DISRUPTION LIVE ── */
-  .live-indicator {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .live-dot {
-    width: 7px; height: 7px;
-    background: var(--red);
-    border-radius: 50%;
-    animation: pulse 1s infinite;
-  }
-
-  /* ── SCROLLBAR ── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  .progress-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    margin: 6px 0;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 1s ease;
-  }
-
-  .row { display: flex; gap: 16px; margin-bottom: 20px; }
-  .col-2 { flex: 2; }
-  .col-1 { flex: 1; }
-
-  .divider { height: 1px; background: var(--border); margin: 16px 0; }
-  .text-sm { font-size: 12px; color: var(--text-muted); }
-  .text-mono { font-family: monospace; font-size: 11px; }
-
-  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- ═══════════════ SIDEBAR ═══════════════ -->
-<nav class="sidebar">
-  <div class="sidebar-logo">
-    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAAB..." alt="GigKavach" onerror="this.style.display='none'">
-    <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:white;display:flex;align-items:center;gap:6px">
-      <span style="color:#60a5fa">Gig</span><span style="color:#4ade80">Kavach</span>
+<!-- TOPBAR -->
+<header class="topbar">
+  <button class="menu-btn" onclick="openDrawer()">☰</button>
+  <div class="topbar-center">
+    <div class="topbar-title" id="topbar-title">Aay Darpan — Earnings</div>
+    <div class="topbar-sub">Thu, Mar 20 · Velachery, Chennai</div>
+  </div>
+  <div class="topbar-right">
+    <div class="weather-pill safe" id="weather-badge">🌤️ 31°C</div>
+    <button class="notif-btn" onclick="toggleNotif()">🔔<div class="notif-dot"></div></button>
+  </div>
+</header>
+
+<!-- OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
+<nav class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-logo"><span class="g">Gig</span><span class="k">Kavach</span></div>
+      <div class="drawer-tagline">Protecting Every Ride</div>
     </div>
-    <div class="sidebar-tagline">Protecting Every Ride</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
   </div>
 
-  <div class="sidebar-section">Dashboard</div>
-  <div class="nav-item active" onclick="showPanel('dashboard',this)"><span class="icon">📊</span>Aay Darpan<span class="nav-badge">₹864</span></div>
-  <div class="nav-item" onclick="showPanel('insurance',this)"><span class="icon">🛡️</span>Suraksha Kavach<span class="nav-badge">LIVE</span></div>
-  <div class="nav-item" onclick="showPanel('claims',this)"><span class="icon">⚡</span>Swayam Claim<span class="nav-badge amber">1</span></div>
-
-  <div class="sidebar-section">Intelligence</div>
-  <div class="nav-item" onclick="showPanel('risk',this)"><span class="icon">🌦️</span>Jokhim Soochak</div>
-  <div class="nav-item" onclick="showPanel('map',this)"><span class="icon">🗺️</span>Surakshit Kshetra</div>
-  <div class="nav-item" onclick="showPanel('orders',this)"><span class="icon">🎯</span>Sahi Chayan</div>
-  <div class="nav-item" onclick="showPanel('ai',this)"><span class="icon">🤖</span>AI Margdarshak</div>
-
-  <div class="sidebar-section">Finance</div>
-  <div class="nav-item" onclick="showPanel('savings',this)"><span class="icon">💰</span>SurakshaPay</div>
-  <div class="nav-item" onclick="showPanel('cashback',this)"><span class="icon">🎁</span>Bonus Vaapsi</div>
-  <div class="nav-item" onclick="showPanel('performance',this)"><span class="icon">📈</span>Kaarya Pradarshan</div>
-
-  <div class="sidebar-section">Trust</div>
-  <div class="nav-item" onclick="showPanel('trust',this)"><span class="icon">✅</span>Vishwas Score</div>
-
-  <div class="sidebar-footer">
-    <div class="rider-card">
-      <div class="rider-avatar">🏍️</div>
-      <div>
-        <div class="rider-name">Ravi Kumar</div>
-        <div class="rider-zone">📍 Velachery, Chennai</div>
+  <!-- PERSONA CARD -->
+  <div class="persona-card">
+    <div class="persona-top">
+      <div class="persona-avatar">
+        🏍️<div class="persona-online"></div>
       </div>
-      <div class="online-dot"></div>
+      <div>
+        <div class="persona-name">Ravi Kumar</div>
+        <div class="persona-handle">Swiggy · Zomato Rider</div>
+        <div class="persona-badge">🟢 Online · Session Active</div>
+      </div>
+    </div>
+    <div class="persona-grid">
+      <div class="persona-item"><div class="persona-item-label">Age</div><div class="persona-item-val">25 yrs</div></div>
+      <div class="persona-item"><div class="persona-item-label">City</div><div class="persona-item-val">Chennai</div></div>
+      <div class="persona-item"><div class="persona-item-label">Zone</div><div class="persona-item-val">📍 Velachery</div></div>
+      <div class="persona-item"><div class="persona-item-label">Phone</div><div class="persona-item-val">Android 4G</div></div>
+    </div>
+    <div class="persona-full">
+      <div class="persona-row"><span class="pl">Platform</span><span class="pr">Swiggy (Primary), Zomato</span></div>
+      <div class="persona-row"><span class="pl">Working Hours</span><span class="pr">9–10 hrs/day, 6 days/wk</span></div>
+      <div class="persona-row"><span class="pl">Avg Deliveries</span><span class="pr">14–17 orders/day</span></div>
+      <div class="persona-row"><span class="pl">Hourly Income</span><span class="pr">₹85–₹100/hr</span></div>
+      <div class="persona-row"><span class="pl">Monthly Net</span><span class="pr">₹18,000–₹24,000</span></div>
+      <div class="persona-row"><span class="pl">Savings Buffer</span><span class="pr">&lt;₹3,000</span></div>
+      <div class="persona-row"><span class="pl">Risk Season</span><span class="pr">Oct–Dec · May–Jun</span></div>
+      <div class="persona-row"><span class="pl">Language</span><span class="pr">Tamil (Primary)</span></div>
+      <div class="persona-row"><span class="pl">Insurance</span><span class="pr" style="color:#4ade80">GigKavach ✅</span></div>
+      <div class="persona-row"><span class="pl">KYC Status</span><span class="pr" style="color:#4ade80">Verified · Aadhaar ✅</span></div>
+      <div class="persona-row"><span class="pl">Vishwas Score</span><span class="pr" style="color:#4ade80">90/100 · Low Risk</span></div>
+      <div class="persona-row"><span class="pl">Risk Tier</span><span class="pr" style="color:#fbbf24">Moderate · Score 50.25</span></div>
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap">
+      <div class="chip white" style="font-size:9px">🛡️ Moderate Risk</div>
+      <div class="chip white" style="font-size:9px">✅ Vishwas 90</div>
+      <div class="chip white" style="font-size:9px">📍 185 Zones</div>
     </div>
   </div>
+
+  <div class="drawer-section">Dashboard</div>
+  <div class="nav-item active" onclick="showPanel('dashboard',this)"><span class="nav-icon">📊</span>Aay Darpan<span class="nav-badge">₹864</span></div>
+  <div class="nav-item" onclick="showPanel('insurance',this)"><span class="nav-icon">🛡️</span>Suraksha Kavach<span class="nav-badge">LIVE</span></div>
+  <div class="nav-item" onclick="showPanel('claims',this)"><span class="nav-icon">⚡</span>Swayam Claim<span class="nav-badge amber">1</span></div>
+
+  <div class="drawer-section">Intelligence</div>
+  <div class="nav-item" onclick="showPanel('risk',this)"><span class="nav-icon">🌦️</span>Jokhim Soochak</div>
+  <div class="nav-item" onclick="showPanel('map',this)"><span class="nav-icon">🗺️</span>Surakshit Kshetra</div>
+  <div class="nav-item" onclick="showPanel('orders',this)"><span class="nav-icon">🎯</span>Sahi Chayan</div>
+  <div class="nav-item" onclick="showPanel('ai',this)"><span class="nav-icon">🤖</span>AI Margdarshak</div>
+
+  <div class="drawer-section">Finance</div>
+  <div class="nav-item" onclick="showPanel('savings',this)"><span class="nav-icon">💰</span>SurakshaPay</div>
+  <div class="nav-item" onclick="showPanel('cashback',this)"><span class="nav-icon">🎁</span>Bonus Vaapsi</div>
+  <div class="nav-item" onclick="showPanel('performance',this)"><span class="nav-icon">📈</span>Kaarya Pradarshan</div>
+
+  <div class="drawer-section">Trust</div>
+  <div class="nav-item" onclick="showPanel('trust',this)"><span class="nav-icon">✅</span>Vishwas Score</div>
+  <div style="height:20px"></div>
 </nav>
 
-<!-- ═══════════════ MAIN ═══════════════ -->
-<div class="main">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div>
-      <div class="topbar-title" id="topbar-title">Aay Darpan — Earnings Dashboard</div>
-      <div class="topbar-sub">Thursday, March 20, 2026 · Velachery Zone</div>
-    </div>
-    <div class="topbar-right">
-      <div class="weather-badge safe" id="weather-badge">🌤️ Clear · 31°C · AQI 68</div>
-      <div class="notif-btn" onclick="toggleNotif()">🔔<div class="notif-dot"></div></div>
-    </div>
-  </div>
-
-  <!-- Notification overlay -->
-  <div id="notif-panel" style="display:none;position:absolute;top:64px;right:24px;width:320px;z-index:300">
-    <div class="card" style="padding:16px">
-      <div class="card-title">📬 Smart Alerts</div>
-      <div class="alert info"><span class="alert-icon">🌧️</span><span>Heavy rain forecast tomorrow 2–5 PM in Velachery</span><span class="alert-time">1h ago</span></div>
-      <div class="alert success"><span class="alert-icon">💚</span><span>₹179 credited to your UPI (monsoon disruption)</span><span class="alert-time">Yesterday</span></div>
-      <div class="alert warning"><span class="alert-icon">⚠️</span><span>Zone risk upgrading to HIGH tomorrow. Review premium.</span><span class="alert-time">2h ago</span></div>
-    </div>
-  </div>
-
-  <div class="content">
-
-<!-- ════════ DASHBOARD ════════ -->
-<div class="panel active" id="panel-dashboard">
-  <div class="grid-4">
-    <div class="stat-card blue">
-      <div class="stat-icon blue">💵</div>
-      <div class="stat-val">₹864</div>
-      <div class="stat-label">Today's Earnings</div>
-      <div class="stat-change up">↑ +₹96 vs yesterday</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-icon green">🛡️</div>
-      <div class="stat-val">₹179</div>
-      <div class="stat-label">Income Protected (Week)</div>
-      <div class="stat-change up">↑ Payout disbursed</div>
-    </div>
-    <div class="stat-card amber">
-      <div class="stat-icon amber">📦</div>
-      <div class="stat-val">17</div>
-      <div class="stat-label">Deliveries Today</div>
-      <div class="stat-change up">↑ 2 above target</div>
-    </div>
-    <div class="stat-card navy">
-      <div class="stat-icon navy">💰</div>
-      <div class="stat-val">₹231</div>
-      <div class="stat-label">Savings Pool (Week)</div>
-      <div class="stat-change up">↑ Growing</div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-2">
-      <div class="card">
-        <div class="card-title">📊 Weekly Earnings vs Protected Income</div>
-        <div style="display:flex;gap:16px;margin-bottom:12px">
-          <div class="chip blue">■ Gross Earnings</div>
-          <div class="chip green">■ Protected (Payout)</div>
-          <div class="chip amber">■ Disruption Day</div>
-        </div>
-        <div class="earnings-chart">
-          <div class="bar-wrap"><div class="bar normal" style="height:75%"></div><div class="bar-day">Mon</div></div>
-          <div class="bar-wrap"><div class="bar disruption" style="height:22%" title="Disruption: ₹179 payout"></div><div class="bar-day">Tue🌧️</div></div>
-          <div class="bar-wrap"><div class="bar normal" style="height:68%"></div><div class="bar-day">Wed</div></div>
-          <div class="bar-wrap"><div class="bar normal" style="height:82%"></div><div class="bar-day">Thu</div></div>
-          <div class="bar-wrap"><div class="bar normal" style="height:70%"></div><div class="bar-day">Fri</div></div>
-          <div class="bar-wrap"><div class="bar normal" style="height:88%"></div><div class="bar-day">Sat</div></div>
-          <div class="bar-wrap"><div class="bar protected" style="height:45%"></div><div class="bar-day">Sun</div></div>
-        </div>
-        <div class="divider"></div>
-        <div style="display:flex;gap:20px">
-          <div><div class="text-sm">Weekly Gross</div><div style="font-weight:700;font-size:16px">₹5,328</div></div>
-          <div><div class="text-sm">Protected Income</div><div style="font-weight:700;font-size:16px;color:var(--green-dark)">₹179</div></div>
-          <div><div class="text-sm">Recovery Rate</div><div style="font-weight:700;font-size:16px;color:var(--blue)">82%</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="col-1">
-      <div class="card" style="height:100%">
-        <div class="card-title">📅 Week at a Glance</div>
-        <div style="font-size:13px">
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>Mon, Mar 16</span><span style="font-weight:600;color:var(--blue)">₹864</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);background:#fff7ed;border-radius:6px;padding:8px"><span>Tue, Mar 17 🌧️</span><span style="font-weight:600;color:var(--amber)">₹192 <small style="color:var(--green-dark)">+₹179</small></span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>Wed, Mar 18</span><span style="font-weight:600;color:var(--blue)">₹816</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>Thu, Mar 19</span><span style="font-weight:600;color:var(--blue)">₹960</span></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span>Fri, Mar 20</span><span style="font-weight:600;color:var(--green-dark)">₹864 ✓ Today</span></div>
-        </div>
-        <div class="divider"></div>
-        <div class="ai-card">
-          <div class="ai-header"><div class="ai-tag">AI INSIGHT</div></div>
-          <div class="ai-text">You earned <strong>₹179 more</strong> than an unprotected rider on Tuesday. Your coverage ROI this week: <strong>411%</strong> 🎯</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div style="margin-bottom:20px">
-    <div class="section-header">
-      <div class="section-title">⚡ Live Activity</div>
-      <div class="live-indicator"><div class="live-dot"></div>ACTIVE SESSION</div>
-    </div>
-    <div class="card">
-      <div style="display:flex;gap:24px;flex-wrap:wrap">
-        <div><div class="text-sm">Current Speed</div><div style="font-size:22px;font-weight:800">28 km/h</div></div>
-        <div><div class="text-sm">Zone Status</div><div class="chip green" style="margin-top:4px">🟢 Safe</div></div>
-        <div><div class="text-sm">Session Duration</div><div style="font-size:22px;font-weight:800">3h 42m</div></div>
-        <div><div class="text-sm">Today's Deliveries</div><div style="font-size:22px;font-weight:800">17</div></div>
-        <div><div class="text-sm">GPS Signal</div><div class="chip green" style="margin-top:4px">✅ Strong</div></div>
-        <div><div class="text-sm">Coverage</div><div class="chip blue" style="margin-top:4px">🛡️ Active</div></div>
-      </div>
-    </div>
+<!-- NOTIF PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="card" style="padding:14px">
+    <div class="card-title">📬 Smart Alerts</div>
+    <div class="alert info"><span class="alert-icon">🌧️</span><span>Heavy rain forecast tomorrow 2–5 PM in Velachery</span><span class="alert-time">1h</span></div>
+    <div class="alert success"><span class="alert-icon">💚</span><span>₹179 credited to your UPI — monsoon payout</span><span class="alert-time">Yest.</span></div>
+    <div class="alert warning"><span class="alert-icon">⚠️</span><span>Zone risk upgrading to HIGH tomorrow. Review premium.</span><span class="alert-time">2h</span></div>
   </div>
 </div>
 
-<!-- ════════ INSURANCE ════════ -->
-<div class="panel" id="panel-insurance">
-  <div class="insurance-hero">
-    <div class="ins-status"><div class="live-dot"></div>Coverage Active — Week of Mar 16–22</div>
-    <div class="ins-amount">₹1,500</div>
-    <div class="ins-subtitle">Maximum weekly protection · Moderate Risk Zone · Velachery</div>
-    <div class="ins-bar"><div class="ins-bar-fill" style="width:15%"></div></div>
-    <div class="ins-bar-label"><span>₹179 used</span><span>₹1,321 remaining</span></div>
+<!-- MAIN -->
+<div class="main">
+<div class="content">
+
+<!-- ══════ DASHBOARD ══════ -->
+<div class="panel active" id="panel-dashboard">
+  <div class="grid-2">
+    <div class="stat-card blue"><div class="stat-icon blue">💵</div><div class="stat-val">₹864</div><div class="stat-label">Today's Earnings</div><div class="stat-change up">↑ +₹96</div></div>
+    <div class="stat-card green"><div class="stat-icon green">🛡️</div><div class="stat-val">₹179</div><div class="stat-label">Protected (Week)</div><div class="stat-change up">↑ Paid Out</div></div>
+    <div class="stat-card amber"><div class="stat-icon amber">📦</div><div class="stat-val">17</div><div class="stat-label">Deliveries Today</div><div class="stat-change up">↑ +2 target</div></div>
+    <div class="stat-card navy"><div class="stat-icon navy">💰</div><div class="stat-val">₹231</div><div class="stat-label">Savings Pool</div><div class="stat-change up">↑ Growing</div></div>
   </div>
 
-  <div class="grid-3">
-    <div class="card">
-      <div class="card-title">💳 Current Policy</div>
-      <div style="font-size:12px;color:var(--text-muted)">Zone Risk Tier</div>
-      <div class="chip amber" style="margin:6px 0">🟡 Moderate Risk · 50.25</div>
-      <div class="divider"></div>
-      <div style="font-size:13px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="text-sm">Weekly Premium</span><span style="font-weight:700">₹35</span></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="text-sm">Coverage Limit</span><span style="font-weight:700">₹1,500</span></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="text-sm">Protection Ratio</span><span style="font-weight:700;color:var(--green-dark)">43×</span></div>
-        <div style="display:flex;justify-content:space-between"><span class="text-sm">Break-even</span><span style="font-weight:700">0.39 hrs disruption</span></div>
-      </div>
+  <div class="card">
+    <div class="card-title">📊 Weekly Earnings</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <div class="chip blue" style="font-size:10px">■ Gross</div>
+      <div class="chip green" style="font-size:10px">■ Protected</div>
+      <div class="chip amber" style="font-size:10px">■ Disruption</div>
     </div>
-    <div class="card">
-      <div class="card-title">📊 Risk Score Breakdown</div>
-      <div style="font-size:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span>🌧️ Rain Risk (30%)</span><div class="progress-bar" style="flex:1;margin:0 8px"><div class="progress-fill" style="width:65%;background:var(--blue)"></div></div><span style="font-weight:700">65</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span>🌊 Flood Risk (25%)</span><div class="progress-bar" style="flex:1;margin:0 8px"><div class="progress-fill" style="width:60%;background:var(--blue)"></div></div><span style="font-weight:700">60</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span>☀️ Heat Risk (20%)</span><div class="progress-bar" style="flex:1;margin:0 8px"><div class="progress-fill" style="width:40%;background:var(--amber)"></div></div><span style="font-weight:700">40</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span>🚗 Traffic (15%)</span><div class="progress-bar" style="flex:1;margin:0 8px"><div class="progress-fill" style="width:35%;background:var(--green)"></div></div><span style="font-weight:700">35</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span>🌪️ Storm Risk (10%)</span><div class="progress-bar" style="flex:1;margin:0 8px"><div class="progress-fill" style="width:25%;background:var(--green)"></div></div><span style="font-weight:700">25</span>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div style="text-align:center"><span style="font-size:20px;font-weight:800;font-family:'Syne',sans-serif">50.25</span><span class="text-sm"> / 100 — Moderate</span></div>
+    <div class="earnings-chart">
+      <div class="bar-wrap"><div class="bar normal" style="height:75%"></div><div class="bar-day">Mon</div></div>
+      <div class="bar-wrap"><div class="bar disruption" style="height:22%"></div><div class="bar-day">Tue🌧️</div></div>
+      <div class="bar-wrap"><div class="bar normal" style="height:68%"></div><div class="bar-day">Wed</div></div>
+      <div class="bar-wrap"><div class="bar normal" style="height:82%"></div><div class="bar-day">Thu</div></div>
+      <div class="bar-wrap"><div class="bar normal" style="height:70%"></div><div class="bar-day">Fri</div></div>
+      <div class="bar-wrap"><div class="bar normal" style="height:88%"></div><div class="bar-day">Sat</div></div>
+      <div class="bar-wrap"><div class="bar protected" style="height:45%"></div><div class="bar-day">Sun</div></div>
     </div>
-    <div class="card">
-      <div class="card-title">🕒 Disruptions Covered</div>
-      <div style="font-size:12px">
-        <div style="padding:8px 0;border-bottom:1px solid var(--border)">🌧️ Heavy Rainfall <span class="chip green" style="float:right;font-size:10px">≥40mm/3hr</span></div>
-        <div style="padding:8px 0;border-bottom:1px solid var(--border)">🌊 Urban Waterlogging <span class="chip green" style="float:right;font-size:10px">Active</span></div>
-        <div style="padding:8px 0;border-bottom:1px solid var(--border)">☀️ Extreme Heat <span class="chip amber" style="float:right;font-size:10px">≥42°C</span></div>
-        <div style="padding:8px 0;border-bottom:1px solid var(--border)">😷 High AQI <span class="chip amber" style="float:right;font-size:10px">≥250</span></div>
-        <div style="padding:8px 0">🌪️ Storm / Wind <span class="chip amber" style="float:right;font-size:10px">≥50km/h</span></div>
-      </div>
-      <div class="divider"></div>
-      <button class="btn btn-green" style="width:100%">Renew Next Week →</button>
+    <div class="divider"></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div><div class="text-sm">Weekly Gross</div><div style="font-weight:700">₹5,328</div></div>
+      <div><div class="text-sm">Protected</div><div style="font-weight:700;color:var(--green-dark)">₹179</div></div>
+      <div><div class="text-sm">Recovery Rate</div><div style="font-weight:700;color:var(--blue)">82%</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📅 This Week</div>
+    <div style="font-size:12px">
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span>Mon, Mar 16</span><span style="font-weight:700;color:var(--blue)">₹864</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 6px;background:#fff7ed;border-radius:6px;border-bottom:1px solid var(--border)"><span>Tue, Mar 17 🌧️</span><span style="font-weight:700"><span style="color:var(--amber)">₹192</span> <span style="color:var(--green-dark)">+₹179</span></span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span>Wed, Mar 18</span><span style="font-weight:700;color:var(--blue)">₹816</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span>Thu, Mar 19</span><span style="font-weight:700;color:var(--blue)">₹960</span></div>
+      <div style="display:flex;justify-content:space-between;padding:7px 0"><span>Fri, Mar 20 ✓ Today</span><span style="font-weight:700;color:var(--green-dark)">₹864</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-header">
+      <span style="font-size:13px;font-weight:700">⚡ Live Session</span>
+      <div class="live-indicator"><div class="live-dot"></div>ACTIVE</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+      <div style="text-align:center;padding:8px;background:var(--bg);border-radius:10px"><div style="font-size:18px;font-weight:800">28</div><div class="text-sm">km/h</div></div>
+      <div style="text-align:center;padding:8px;background:var(--bg);border-radius:10px"><div style="font-size:18px;font-weight:800">3h42</div><div class="text-sm">Session</div></div>
+      <div style="text-align:center;padding:8px;background:var(--bg);border-radius:10px"><div style="font-size:18px;font-weight:800">17</div><div class="text-sm">Orders</div></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px">
+      <div class="chip green">🟢 Zone Safe</div>
+      <div class="chip blue">📡 GPS Strong</div>
+      <div class="chip green">🛡️ Coverage ON</div>
     </div>
   </div>
 
   <div class="ai-card">
-    <div class="ai-header"><div class="ai-tag">AI MARGDARSHAK</div><span style="font-size:13px;font-weight:600">Premium Intelligence</span></div>
-    <div class="ai-text">At just <strong>₹5/day</strong>, your GigKavach policy covers <strong>43× your premium</strong>. Tuesday's monsoon confirmed this — you recovered 82% of lost income automatically. Monsoon season begins in 6 weeks; your premium may increase to ₹50/week (High Risk). Lock in Moderate pricing now.</div>
+    <div class="ai-header"><div class="ai-tag">AI INSIGHT</div></div>
+    <div class="ai-text">You earned <strong>₹179 more</strong> than an unprotected rider on Tuesday. Coverage ROI this week: <strong>411%</strong> 🎯</div>
   </div>
 </div>
 
-<!-- ════════ CLAIMS ════════ -->
-<div class="panel" id="panel-claims">
-  <div class="payout-hero" style="margin-bottom:20px">
-    <div class="live-indicator" style="display:inline-flex;margin-bottom:8px"><div class="live-dot"></div>LAST PAYOUT DISBURSED</div>
-    <div class="payout-amount">₹179</div>
-    <div class="payout-tag">Tuesday, Mar 17 · Heavy Monsoon · Velachery Zone · UPI credited in 18 min</div>
+<!-- ══════ INSURANCE ══════ -->
+<div class="panel" id="panel-insurance">
+  <div class="insurance-hero">
+    <div class="ins-status"><div class="live-dot"></div>Coverage Active · Mar 16–22</div>
+    <div class="ins-amount">₹1,500</div>
+    <div class="ins-subtitle">Max weekly protection · Moderate Risk · Velachery</div>
+    <div class="ins-bar"><div class="ins-bar-fill" style="width:15%"></div></div>
+    <div class="ins-bar-label"><span>₹179 used</span><span>₹1,321 remaining</span></div>
   </div>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">⚙️ Hybrid Score Calculation</div>
-      <div style="font-size:12px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span>💵 Income Deviation (50%)</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:64%;background:var(--blue)"></div></div>
-            <span style="font-weight:700">0.644</span>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:6px 10px;background:var(--bg);border-radius:8px">(₹90 − ₹32) / ₹90 = 0.644</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span>📦 Activity Drop (30%)</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:69%;background:var(--amber)"></div></div>
-            <span style="font-weight:700">0.688</span>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:6px 10px;background:var(--bg);border-radius:8px">(16 − 5) / 16 = 0.688</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span>🌦️ Env. Score (20%)</span>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:70%;background:var(--green)"></div></div>
-            <span style="font-weight:700">0.700</span>
-          </div>
-        </div>
-        <div style="font-size:11px;color:var(--text-muted);padding:6px 10px;background:var(--bg);border-radius:8px">OpenWeatherMap + AQICN API</div>
-      </div>
-      <div class="divider"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-weight:700">Hybrid Score</span>
-        <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--blue)">0.662</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <span style="font-weight:700">Final Payout = ₹90 × 0.662 × 3h</span>
-        <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green-dark)">₹179</span>
-      </div>
+  <div class="card">
+    <div class="card-title">💳 Policy Details</div>
+    <div class="grid-2" style="margin-bottom:10px">
+      <div style="padding:8px;background:var(--bg);border-radius:8px"><div class="text-sm">Weekly Premium</div><div style="font-weight:800;font-size:16px">₹35</div></div>
+      <div style="padding:8px;background:var(--bg);border-radius:8px"><div class="text-sm">Coverage Limit</div><div style="font-weight:800;font-size:16px">₹1,500</div></div>
+      <div style="padding:8px;background:var(--bg);border-radius:8px"><div class="text-sm">Protection Ratio</div><div style="font-weight:800;font-size:16px;color:var(--green-dark)">43×</div></div>
+      <div style="padding:8px;background:var(--bg);border-radius:8px"><div class="text-sm">Break-even</div><div style="font-weight:800;font-size:16px">0.39 hrs</div></div>
     </div>
+    <div class="chip amber">🟡 Moderate Risk Zone · Score: 50.25</div>
+  </div>
 
-    <div class="card">
-      <div class="card-title">⏱️ Auto Claim Timeline</div>
-      <div class="claim-timeline">
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Disruption Detected</div>
-            <div class="claim-step-time">Rain ≥40mm in Velachery Zone · 14:15 IST</div>
-          </div>
-        </div>
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">GPS Presence Verified</div>
-            <div class="claim-step-time">Ravi in zone for 78% of event duration · 14:16 IST</div>
-          </div>
-        </div>
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Fraud Check Passed</div>
-            <div class="claim-step-time">Vishwas Score: LOW RISK (22/100) · 14:17 IST</div>
-          </div>
-        </div>
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Hybrid Score Computed</div>
-            <div class="claim-step-time">Score: 0.662 · Payout: ₹179 · 14:18 IST</div>
-          </div>
-        </div>
-        <div class="claim-step">
-          <div class="claim-dot done">💚</div>
-          <div class="claim-info">
-            <div class="claim-step-title" style="color:var(--green-dark)">₹179 Credited via UPI</div>
-            <div class="claim-step-time">Razorpay → ravi@upi · 14:33 IST · 18 minutes total</div>
-          </div>
-        </div>
-      </div>
+  <div class="card">
+    <div class="card-title">📊 Risk Score (50.25 / 100)</div>
+    <div style="font-size:11px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="width:100px;flex-shrink:0">🌧️ Rain (30%)</span><div class="progress-bar" style="flex:1;margin:0"><div class="progress-fill" style="width:65%;background:var(--blue)"></div></div><span style="font-weight:700;width:20px;flex-shrink:0">65</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="width:100px;flex-shrink:0">🌊 Flood (25%)</span><div class="progress-bar" style="flex:1;margin:0"><div class="progress-fill" style="width:60%;background:var(--blue)"></div></div><span style="font-weight:700;width:20px;flex-shrink:0">60</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="width:100px;flex-shrink:0">☀️ Heat (20%)</span><div class="progress-bar" style="flex:1;margin:0"><div class="progress-fill" style="width:40%;background:var(--amber)"></div></div><span style="font-weight:700;width:20px;flex-shrink:0">40</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="width:100px;flex-shrink:0">🚗 Traffic (15%)</span><div class="progress-bar" style="flex:1;margin:0"><div class="progress-fill" style="width:35%;background:var(--green)"></div></div><span style="font-weight:700;width:20px;flex-shrink:0">35</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="width:100px;flex-shrink:0">🌪️ Storm (10%)</span><div class="progress-bar" style="flex:1;margin:0"><div class="progress-fill" style="width:25%;background:var(--green)"></div></div><span style="font-weight:700;width:20px;flex-shrink:0">25</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🕒 Disruptions Covered</div>
+    <div style="font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>🌧️ Heavy Rainfall</span><span class="chip green" style="font-size:10px">≥40mm / 3hr</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>🌊 Urban Waterlogging</span><span class="chip green" style="font-size:10px">Active</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>☀️ Extreme Heat</span><span class="chip amber" style="font-size:10px">≥42°C</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>😷 High AQI</span><span class="chip amber" style="font-size:10px">≥250</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0"><span>🌪️ Storm / Strong Wind</span><span class="chip amber" style="font-size:10px">≥50 km/h</span></div>
+    </div>
+    <div class="divider"></div>
+    <button class="btn btn-green btn-block">Renew Next Week →</button>
+  </div>
+
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">AI MARGDARSHAK</div></div>
+    <div class="ai-text">At just <strong>₹5/day</strong>, your policy covers <strong>43× your premium</strong>. Tuesday's monsoon: you recovered 82% of lost income automatically. Monsoon in 6 weeks — lock in Moderate pricing now.</div>
+  </div>
+</div>
+
+<!-- ══════ CLAIMS ══════ -->
+<div class="panel" id="panel-claims">
+  <div class="payout-hero">
+    <div class="live-indicator" style="display:inline-flex;margin-bottom:8px"><div class="live-dot"></div>LAST PAYOUT</div>
+    <div class="payout-amount">₹179</div>
+    <div class="payout-tag">Tue Mar 17 · Heavy Monsoon · Velachery · UPI in 18 min</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Hybrid Score Calculation</div>
+    <div style="font-size:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>💵 Income Deviation (50%)</span><span style="font-weight:700">0.644</span></div>
+      <div style="font-size:10px;color:var(--muted);padding:5px 8px;background:var(--bg);border-radius:6px;margin-bottom:10px">(₹90 − ₹32) / ₹90 = 0.644</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>📦 Activity Drop (30%)</span><span style="font-weight:700">0.688</span></div>
+      <div style="font-size:10px;color:var(--muted);padding:5px 8px;background:var(--bg);border-radius:6px;margin-bottom:10px">(16 − 5) / 16 = 0.688</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>🌦️ Environmental Score (20%)</span><span style="font-weight:700">0.700</span></div>
+      <div style="font-size:10px;color:var(--muted);padding:5px 8px;background:var(--bg);border-radius:6px">OpenWeatherMap + AQICN API combined</div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-weight:700">Hybrid Score</span>
+      <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--blue)">0.662</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;font-weight:600">₹90 × 0.662 × 3 hrs</span>
+      <span style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--green-dark)">₹179</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⏱️ Auto Claim Timeline</div>
+    <div class="claim-timeline">
+      <div class="claim-step done"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">Disruption Detected</div><div class="claim-step-time">Rain ≥40mm · Velachery Zone · 14:15 IST</div></div></div>
+      <div class="claim-step done"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">GPS Presence Verified</div><div class="claim-step-time">Ravi in zone for 78% of event · 14:16 IST</div></div></div>
+      <div class="claim-step done"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">Fraud Check Passed</div><div class="claim-step-time">Vishwas Score: 22 (LOW RISK) · 14:17 IST</div></div></div>
+      <div class="claim-step"><div class="claim-dot done">💚</div><div class="claim-info"><div class="claim-step-title" style="color:var(--green-dark)">₹179 Credited via UPI</div><div class="claim-step-time">Razorpay → ravi@upi · 14:33 IST · 18 min total</div></div></div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-title">📋 Claims History</div>
-    <table class="order-table">
-      <thead>
-        <tr><th>Date</th><th>Disruption</th><th>Duration</th><th>Hybrid Score</th><th>Payout</th><th>Status</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Mar 17</td><td>🌧️ Heavy Rain 70mm</td><td>3 hrs</td><td>0.662</td><td style="font-weight:700;color:var(--green-dark)">₹179</td><td><span class="chip green">✅ Paid</span></td></tr>
-        <tr><td>Feb 28</td><td>☀️ Heat Wave 43°C</td><td>2 hrs</td><td>0.380</td><td style="font-weight:700;color:var(--green-dark)">₹68</td><td><span class="chip green">✅ Paid</span></td></tr>
-        <tr><td>Feb 10</td><td>🌧️ Rain 55mm</td><td>2.5 hrs</td><td>0.520</td><td style="font-weight:700;color:var(--green-dark)">₹117</td><td><span class="chip green">✅ Paid</span></td></tr>
-        <tr><td>Jan 22</td><td>😷 AQI 280</td><td>6 hrs</td><td>0.280</td><td style="font-weight:700;color:var(--green-dark)">₹101</td><td><span class="chip green">✅ Paid</span></td></tr>
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="order-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Hrs</th><th>Score</th><th>Payout</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Mar 17</td><td>🌧️ Rain 70mm</td><td>3</td><td>0.662</td><td style="font-weight:700;color:var(--green-dark)">₹179</td><td><span class="chip green" style="font-size:10px">✅</span></td></tr>
+          <tr><td>Feb 28</td><td>☀️ Heat 43°C</td><td>2</td><td>0.380</td><td style="font-weight:700;color:var(--green-dark)">₹68</td><td><span class="chip green" style="font-size:10px">✅</span></td></tr>
+          <tr><td>Feb 10</td><td>🌧️ Rain 55mm</td><td>2.5</td><td>0.520</td><td style="font-weight:700;color:var(--green-dark)">₹117</td><td><span class="chip green" style="font-size:10px">✅</span></td></tr>
+          <tr><td>Jan 22</td><td>😷 AQI 280</td><td>6</td><td>0.280</td><td style="font-weight:700;color:var(--green-dark)">₹101</td><td><span class="chip green" style="font-size:10px">✅</span></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- ════════ RISK ════════ -->
+<!-- ══════ RISK ══════ -->
 <div class="panel" id="panel-risk">
-  <div class="grid-3">
-    <div class="card">
-      <div class="card-title">🌦️ Live Conditions — Velachery</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div style="background:#dbeafe;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:28px">🌤️</div>
-          <div style="font-weight:700;font-size:16px">31°C</div>
-          <div class="text-sm">Temperature</div>
-        </div>
-        <div style="background:#dcfce7;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:28px">💧</div>
-          <div style="font-weight:700;font-size:16px">8mm</div>
-          <div class="text-sm">Rainfall (3h)</div>
-        </div>
-        <div style="background:#fef9c3;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:28px">💨</div>
-          <div style="font-weight:700;font-size:16px">22 km/h</div>
-          <div class="text-sm">Wind Speed</div>
-        </div>
-        <div style="background:#dcfce7;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:28px">😷</div>
-          <div style="font-weight:700;font-size:16px">AQI 68</div>
-          <div class="text-sm">Air Quality</div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="chip green" style="margin-bottom:6px">✅ All thresholds within safe limits</div>
-    </div>
+  <div class="grid-2" style="margin-bottom:12px">
+    <div style="background:#dbeafe;border-radius:12px;padding:12px;text-align:center"><div style="font-size:26px">🌤️</div><div style="font-weight:800;font-size:16px">31°C</div><div class="text-sm">Temperature</div></div>
+    <div style="background:#dcfce7;border-radius:12px;padding:12px;text-align:center"><div style="font-size:26px">💧</div><div style="font-weight:800;font-size:16px">8mm</div><div class="text-sm">Rainfall / 3hr</div></div>
+    <div style="background:#fef9c3;border-radius:12px;padding:12px;text-align:center"><div style="font-size:26px">💨</div><div style="font-weight:800;font-size:16px">22 km/h</div><div class="text-sm">Wind Speed</div></div>
+    <div style="background:#dcfce7;border-radius:12px;padding:12px;text-align:center"><div style="font-size:26px">😷</div><div style="font-weight:800;font-size:16px">AQI 68</div><div class="text-sm">Air Quality</div></div>
+  </div>
+  <div class="chip green" style="margin-bottom:12px;display:inline-flex">✅ All thresholds safe — No active disruption</div>
 
-    <div class="card">
-      <div class="card-title">📅 48-Hr Disruption Forecast</div>
-      <div class="forecast-row">
-        <div class="forecast-day">Today</div>
-        <div class="forecast-bar-wrap"><div class="forecast-bar" style="width:12%;background:var(--green)"></div></div>
-        <div class="forecast-prob" style="color:var(--green-dark)">12%</div>
-      </div>
-      <div class="forecast-row">
-        <div class="forecast-day">Fri PM</div>
-        <div class="forecast-bar-wrap"><div class="forecast-bar" style="width:45%;background:var(--amber)"></div></div>
-        <div class="forecast-prob" style="color:var(--amber)">45%</div>
-      </div>
-      <div class="forecast-row">
-        <div class="forecast-day">Sat AM</div>
-        <div class="forecast-bar-wrap"><div class="forecast-bar" style="width:72%;background:var(--red)"></div></div>
-        <div class="forecast-prob" style="color:var(--red)">72%</div>
-      </div>
-      <div class="forecast-row">
-        <div class="forecast-day">Sat PM</div>
-        <div class="forecast-bar-wrap"><div class="forecast-bar" style="width:85%;background:var(--red)"></div></div>
-        <div class="forecast-prob" style="color:var(--red)">85%</div>
-      </div>
-      <div class="forecast-row">
-        <div class="forecast-day">Sun AM</div>
-        <div class="forecast-bar-wrap"><div class="forecast-bar" style="width:30%;background:var(--amber)"></div></div>
-        <div class="forecast-prob" style="color:var(--amber)">30%</div>
-      </div>
-      <div class="ai-card" style="margin-top:12px">
-        <div class="ai-header"><div class="ai-tag">PROPHET MODEL</div></div>
-        <div class="ai-text">⚠️ High disruption probability Saturday. Finish deliveries before 2 PM. Ensure policy active.</div>
-      </div>
+  <div class="card">
+    <div class="card-title">📅 48-Hr Disruption Forecast</div>
+    <div class="forecast-row"><div class="forecast-day">Today</div><div class="forecast-bar-wrap"><div class="forecast-bar" style="width:12%;background:var(--green)"></div></div><div class="forecast-prob" style="color:var(--green-dark)">12%</div></div>
+    <div class="forecast-row"><div class="forecast-day">Fri PM</div><div class="forecast-bar-wrap"><div class="forecast-bar" style="width:45%;background:var(--amber)"></div></div><div class="forecast-prob" style="color:var(--amber)">45%</div></div>
+    <div class="forecast-row"><div class="forecast-day">Sat AM</div><div class="forecast-bar-wrap"><div class="forecast-bar" style="width:72%;background:var(--red)"></div></div><div class="forecast-prob" style="color:var(--red)">72%</div></div>
+    <div class="forecast-row"><div class="forecast-day">Sat PM</div><div class="forecast-bar-wrap"><div class="forecast-bar" style="width:85%;background:var(--red)"></div></div><div class="forecast-prob" style="color:var(--red)">85%</div></div>
+    <div class="forecast-row"><div class="forecast-day">Sun AM</div><div class="forecast-bar-wrap"><div class="forecast-bar" style="width:30%;background:var(--amber)"></div></div><div class="forecast-prob" style="color:var(--amber)">30%</div></div>
+    <div class="ai-card" style="margin-top:10px">
+      <div class="ai-header"><div class="ai-tag">PROPHET MODEL</div></div>
+      <div class="ai-text">⚠️ High disruption Saturday. Finish deliveries before 2 PM. Ensure policy active by Friday night.</div>
     </div>
+  </div>
 
-    <div class="card">
-      <div class="card-title">🔔 Disruption Thresholds</div>
-      <div style="font-size:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>🌧️ Rain Trigger</span>
-          <div>
-            <div class="text-sm">8mm / 40mm threshold</div>
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:20%;background:var(--green)"></div></div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>☀️ Heat Trigger</span>
-          <div>
-            <div class="text-sm">31°C / 42°C threshold</div>
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:74%;background:var(--amber)"></div></div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>😷 AQI Trigger</span>
-          <div>
-            <div class="text-sm">68 / 250 threshold</div>
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:27%;background:var(--green)"></div></div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
-          <span>🌪️ Wind Trigger</span>
-          <div>
-            <div class="text-sm">22 / 50 km/h threshold</div>
-            <div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:44%;background:var(--green)"></div></div>
-          </div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="chip green">🟢 Zone Status: SAFE — No active disruption</div>
+  <div class="card">
+    <div class="card-title">🔔 Threshold Gauges</div>
+    <div style="font-size:11px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">🌧️ Rain 8mm / 40mm</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:20%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">20%</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">☀️ Heat 31° / 42°C</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:74%;background:var(--amber)"></div></div><span style="font-weight:700;width:28px">74%</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">😷 AQI 68 / 250</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:27%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">27%</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="flex:1">🌪️ Wind 22 / 50 km/h</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:44%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">44%</span></div>
     </div>
   </div>
 </div>
 
-<!-- ════════ MAP ════════ -->
+<!-- ══════ MAP ══════ -->
 <div class="panel" id="panel-map">
-  <div class="section-header">
-    <div class="section-title">🗺️ Surakshit Kshetra — Live Zone Map</div>
-    <div style="display:flex;gap:8px">
-      <div class="chip green">● Safe Zones: 124</div>
-      <div class="chip amber">● Moderate: 42</div>
-      <div class="chip red">● High Risk: 14</div>
-      <div class="chip purple">● Extreme: 5</div>
-    </div>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+    <div class="chip green" style="font-size:10px">● Safe: 124</div>
+    <div class="chip amber" style="font-size:10px">● Moderate: 42</div>
+    <div class="chip red" style="font-size:10px">● High: 14</div>
+    <div class="chip purple" style="font-size:10px">● Extreme: 5</div>
   </div>
 
-  <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
     <div class="zone-map">
       <div class="map-grid" id="mapGrid"></div>
       <div class="rider-pin" style="left:52%;top:48%">🏍️</div>
       <div class="map-overlay">
-        <div style="font-size:11px;font-weight:700;color:white;margin-bottom:6px">ZONE LEGEND</div>
-        <div class="map-legend-item"><div class="legend-dot" style="background:#22c55e"></div>Safe (0–30)</div>
-        <div class="map-legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Moderate (31–50)</div>
-        <div class="map-legend-item"><div class="legend-dot" style="background:#ef4444"></div>High Risk (51–70)</div>
-        <div class="map-legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Extreme (71+)</div>
+        <div style="font-size:10px;font-weight:700;color:#fff;margin-bottom:4px">LEGEND</div>
+        <div class="map-legend-item"><div class="legend-dot" style="background:#22c55e"></div>Safe</div>
+        <div class="map-legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Moderate</div>
+        <div class="map-legend-item"><div class="legend-dot" style="background:#ef4444"></div>High</div>
+        <div class="map-legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Extreme</div>
       </div>
       <div class="map-info-bar">
-        <div>
-          <div class="map-zone-name">📍 Velachery — Your Zone</div>
-          <div class="map-zone-detail">Risk Score: 50.25 · Moderate · 2×2km Grid</div>
-        </div>
-        <div class="chip amber" style="margin-left:auto">Weekly Premium: ₹35</div>
-        <button class="btn btn-primary btn-sm" onclick="showPanel('risk',document.querySelector('.nav-item:nth-child(7)'))">View Risk Details</button>
+        <div><div class="map-zone-name">📍 Velachery — Your Zone</div><div class="map-zone-detail">Score: 50.25 · Moderate · 2×2km</div></div>
+        <div class="chip amber" style="margin-left:auto;font-size:10px">₹35/wk</div>
       </div>
-    </div>
-  </div>
-
-  <div class="grid-3">
-    <div class="card">
-      <div class="card-title">📊 Zone Distribution — Chennai</div>
-      <div style="font-size:13px">
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🟢 Low Risk Zones</span><span style="font-weight:700">124 / 185</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🟡 Moderate Zones</span><span style="font-weight:700">42 / 185</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🔴 High Risk Zones</span><span style="font-weight:700">14 / 185</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0"><span>🟣 Extreme Zones</span><span style="font-weight:700">5 / 185</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">⭐ Top Safe Zones Right Now</div>
-      <div style="font-size:12px">
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>📍 T. Nagar</span><span class="chip green btn-sm">Safe 28</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>📍 Adyar</span><span class="chip green btn-sm">Safe 31</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>📍 Sholinganallur</span><span class="chip green btn-sm">Safe 24</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0"><span>📍 Perungudi</span><span class="chip amber btn-sm">Mod 44</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">⚠️ Zones to Avoid Now</div>
-      <div style="font-size:12px">
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🚫 Velachery (parts)</span><span class="chip red btn-sm">High 62</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🚫 Pallikaranai</span><span class="chip red btn-sm">High 58</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🚫 Tambaram (flood)</span><span class="chip purple btn-sm">Extreme 81</span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0"><span>🚫 Chromepet</span><span class="chip red btn-sm">High 66</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════ ORDERS ════════ -->
-<div class="panel" id="panel-orders">
-  <div class="ai-card">
-    <div class="ai-header"><div class="ai-tag">SAHI CHAYAN — AI ORDER INTELLIGENCE</div></div>
-    <div class="ai-text">Based on your location, current zone risks, and demand patterns — here are today's best order opportunities ranked by earnings potential and safety. Peak demand window: <strong>12:00–14:00 PM & 7:00–9:00 PM</strong>.</div>
-  </div>
-
-  <div class="card" style="margin-bottom:20px">
-    <div class="card-title">🎯 Smart Order Recommendations</div>
-    <table class="order-table">
-      <thead>
-        <tr><th>Restaurant / Dark Store</th><th>Zone</th><th>Distance</th><th>Est. Earning</th><th>Risk</th><th>Demand</th><th>AI Score</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>Zomato — Saravana Bhavan</strong></td><td>T. Nagar</td><td>2.1 km</td>
-          <td style="font-weight:700;color:var(--green-dark)">₹96</td>
-          <td><span class="chip green">🟢 Safe</span></td>
-          <td>🔥 Very High</td>
-          <td><span class="rec-badge hot">⭐ 9.4/10</span></td>
-        </tr>
-        <tr>
-          <td><strong>Zepto — Adyar Ananda Bhavan</strong></td><td>Adyar</td><td>3.2 km</td>
-          <td style="font-weight:700;color:var(--green-dark)">₹112</td>
-          <td><span class="chip green">🟢 Safe</span></td>
-          <td>🔥 High</td>
-          <td><span class="rec-badge hot">⭐ 8.9/10</span></td>
-        </tr>
-        <tr style="background:#f0fdf4">
-          <td><strong>Swiggy — Murugan Idli</strong><br><small style="color:var(--text-muted)">AI Pick — Best ROI</small></td><td>Velachery</td><td>0.8 km</td>
-          <td style="font-weight:700;color:var(--green-dark)">₹88</td>
-          <td><span class="chip amber">🟡 Mod</span></td>
-          <td>⚡ Surge</td>
-          <td><span class="rec-badge hot">⭐ 9.1/10</span></td>
-        </tr>
-        <tr>
-          <td><strong>Swiggy — KFC Velachery</strong></td><td>Velachery</td><td>1.4 km</td>
-          <td style="font-weight:700;color:var(--amber)">₹64</td>
-          <td><span class="chip amber">🟡 Mod</span></td>
-          <td>📦 Medium</td>
-          <td><span class="rec-badge ok">⚡ 7.2/10</span></td>
-        </tr>
-        <tr>
-          <td><strong>Zomato — Pallikaranai outlet</strong></td><td>Pallikaranai</td><td>4.8 km</td>
-          <td style="font-weight:700;color:var(--red)">₹44</td>
-          <td><span class="chip red">🔴 High</span></td>
-          <td>📉 Low</td>
-          <td><span class="rec-badge skip">⛔ 3.1/10</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">⏰ Optimal Working Windows</div>
-      <div style="font-size:13px">
-        <div class="alert success"><span class="alert-icon">🌅</span><span><strong>7–9 AM</strong> — Morning rush. T. Nagar highest demand.</span></div>
-        <div class="alert success"><span class="alert-icon">🍽️</span><span><strong>12–2 PM</strong> — Lunch peak. Velachery + Adyar surge.</span></div>
-        <div class="alert warning"><span class="alert-icon">☀️</span><span><strong>2–4 PM</strong> — Heat risk window. Consider break.</span></div>
-        <div class="alert success"><span class="alert-icon">🌙</span><span><strong>7–9 PM</strong> — Dinner peak. Best earnings window today.</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">💡 Today's AI Strategy</div>
-      <div class="ai-text" style="font-size:13px;line-height:1.7">
-        🎯 <strong>Priority zones:</strong> T. Nagar → Adyar → Velachery core<br>
-        ⚡ <strong>Avoid:</strong> Pallikaranai, Tambaram (flood risk)<br>
-        💰 <strong>Target:</strong> 18 orders today → projected ₹1,120<br>
-        🛡️ <strong>Coverage:</strong> Stay in zone for auto-claim eligibility<br>
-        ⏱️ <strong>Break:</strong> 2:30–4:00 PM (heat + low demand)
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════ AI ════════ -->
-<div class="panel" id="panel-ai">
-  <div style="margin-bottom:20px">
-    <div class="section-title" style="margin-bottom:16px">🤖 AI Margdarshak — Your Gig Intelligence Engine</div>
-
-    <div class="ai-card">
-      <div class="ai-header"><div class="ai-tag">GRADIENT BOOSTING — INCOME MODEL</div></div>
-      <div class="ai-text">Your estimated hourly income for Velachery today: <strong>₹96/hr (12–2PM)</strong>, <strong>₹88/hr (7–9PM)</strong>. Income baseline uses POI density, road connectivity, hour-of-day, and historical order volume proxy. Model retrained weekly.</div>
-    </div>
-
-    <div class="ai-card">
-      <div class="ai-header"><div class="ai-tag">PROPHET — DISRUPTION FORECAST</div></div>
-      <div class="ai-text">Saturday Mar 22 disruption probability: <strong>85%</strong>. Predicted rainfall: 55–70mm between 1–4 PM. Ensure your weekly policy is active before Friday midnight. Expected payout if disruption occurs: <strong>₹156–₹220</strong>.</div>
-    </div>
-
-    <div class="ai-card">
-      <div class="ai-header"><div class="ai-tag">ISOLATION FOREST — FRAUD ENGINE</div></div>
-      <div class="ai-text">Your Vishwas (Trust) Score: <strong>90/100 (Low Risk)</strong>. All GPS sessions show consistent road-speed patterns. No anomalies detected. Auto-pay threshold active. Your claims process <strong>instantly</strong> without manual review.</div>
-    </div>
-
-    <div class="ai-card">
-      <div class="ai-header"><div class="ai-tag">ZONE RISK ENGINE — WEEKLY RECALIBRATION</div></div>
-      <div class="ai-text">Velachery current score: <strong>50.25 (Moderate)</strong>. Monsoon pre-season adjustment (+10% rain risk) expected next week. Projected score: <strong>55.5 → High Risk Tier</strong>. Premium will adjust to ₹50/week from Mar 23 policy.</div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">📊 ML Model Overview</div>
-    <table class="order-table">
-      <thead>
-        <tr><th>Model</th><th>Algorithm</th><th>Purpose</th><th>Retrain</th><th>Status</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>🎯 Risk Scoring Engine</td><td>Gradient Boosting</td><td>Zone premium pricing</td><td>Weekly</td><td><span class="chip green">✅ Active</span></td></tr>
-        <tr><td>🔍 Fraud Detection</td><td>Isolation Forest</td><td>GPS anomaly detection</td><td>Continuous</td><td><span class="chip green">✅ Active</span></td></tr>
-        <tr><td>💰 Income Estimator</td><td>Gradient Boosting</td><td>Per-zone hourly income</td><td>Weekly</td><td><span class="chip green">✅ Active</span></td></tr>
-        <tr><td>📅 Disruption Forecast</td><td>FB Prophet</td><td>48-hr disruption prob.</td><td>Daily</td><td><span class="chip green">✅ Active</span></td></tr>
-      </tbody>
-    </table>
+    <div class="card-title">⭐ Safe Zones Now</div>
+    <div style="font-size:12px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>📍 T. Nagar</span><span class="chip green" style="font-size:10px">Safe 28</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>📍 Adyar</span><span class="chip green" style="font-size:10px">Safe 31</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>📍 Sholinganallur</span><span class="chip green" style="font-size:10px">Safe 24</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0"><span>📍 Perungudi</span><span class="chip amber" style="font-size:10px">Mod 44</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚠️ Zones to Avoid</div>
+    <div style="font-size:12px">
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🚫 Pallikaranai</span><span class="chip red" style="font-size:10px">High 58</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span>🚫 Tambaram</span><span class="chip purple" style="font-size:10px">Extreme 81</span></div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0"><span>🚫 Chromepet</span><span class="chip red" style="font-size:10px">High 66</span></div>
+    </div>
   </div>
 </div>
 
-<!-- ════════ SAVINGS ════════ -->
+<!-- ══════ ORDERS ══════ -->
+<div class="panel" id="panel-orders">
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">SAHI CHAYAN — AI ORDER INTEL</div></div>
+    <div class="ai-text">Best orders ranked by earnings × safety. Peak windows: <strong>12–2 PM &amp; 7–9 PM</strong>.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎯 Recommendations</div>
+    <div class="table-wrap">
+      <table class="order-table">
+        <thead><tr><th>Restaurant</th><th>Zone</th><th>Earn</th><th>Risk</th><th>Score</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Saravana Bhavan</strong><div class="text-sm">Zomato</div></td><td>T. Nagar</td><td style="font-weight:700;color:var(--green-dark)">₹96</td><td><span class="chip green" style="font-size:10px">🟢</span></td><td><span class="rec-badge hot">9.4</span></td></tr>
+          <tr><td><strong>Adyar Ananda B.</strong><div class="text-sm">Zepto</div></td><td>Adyar</td><td style="font-weight:700;color:var(--green-dark)">₹112</td><td><span class="chip green" style="font-size:10px">🟢</span></td><td><span class="rec-badge hot">8.9</span></td></tr>
+          <tr style="background:#f0fdf4"><td><strong>Murugan Idli ⭐</strong><div class="text-sm">Swiggy · AI Pick</div></td><td>Velachery</td><td style="font-weight:700;color:var(--green-dark)">₹88</td><td><span class="chip amber" style="font-size:10px">🟡</span></td><td><span class="rec-badge hot">9.1</span></td></tr>
+          <tr><td><strong>KFC Velachery</strong><div class="text-sm">Swiggy</div></td><td>Velachery</td><td style="font-weight:700;color:var(--amber)">₹64</td><td><span class="chip amber" style="font-size:10px">🟡</span></td><td><span class="rec-badge ok">7.2</span></td></tr>
+          <tr><td><strong>Pallikaranai Out.</strong><div class="text-sm">Zomato</div></td><td>Pallik.</td><td style="font-weight:700;color:var(--red)">₹44</td><td><span class="chip red" style="font-size:10px">🔴</span></td><td><span class="rec-badge skip">3.1</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⏰ Best Working Windows</div>
+    <div class="alert success"><span class="alert-icon">🌅</span><span><strong>7–9 AM</strong> Morning rush — T. Nagar peak</span></div>
+    <div class="alert success"><span class="alert-icon">🍽️</span><span><strong>12–2 PM</strong> Lunch surge — Velachery + Adyar</span></div>
+    <div class="alert warning"><span class="alert-icon">☀️</span><span><strong>2–4 PM</strong> Heat risk window — consider break</span></div>
+    <div class="alert success"><span class="alert-icon">🌙</span><span><strong>7–9 PM</strong> Dinner peak — best earnings today</span></div>
+  </div>
+</div>
+
+<!-- ══════ AI ══════ -->
+<div class="panel" id="panel-ai">
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">GRADIENT BOOSTING — INCOME MODEL</div></div>
+    <div class="ai-text">Today's estimated income: <strong>₹96/hr (12–2PM)</strong>, <strong>₹88/hr (7–9PM)</strong>. Model: POI density × road connectivity × hour of day. Retrained weekly.</div>
+  </div>
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">PROPHET — DISRUPTION FORECAST</div></div>
+    <div class="ai-text">Saturday Mar 22 disruption probability: <strong>85%</strong>. Predicted 55–70mm rain, 1–4 PM. Expected payout if disruption occurs: <strong>₹156–₹220</strong>.</div>
+  </div>
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">ISOLATION FOREST — FRAUD ENGINE</div></div>
+    <div class="ai-text">Vishwas Score: <strong>90/100 (Low Risk)</strong>. All GPS sessions show consistent road-speed patterns. Claims process <strong>instantly without manual review</strong>.</div>
+  </div>
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">RISK ENGINE — WEEKLY RECALIBRATION</div></div>
+    <div class="ai-text">Velachery: <strong>50.25 (Moderate)</strong>. Monsoon pre-season adjustment next week → projected <strong>55.5 (High Risk)</strong>. Premium adjusts to ₹50/week from Mar 23.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 ML Model Status</div>
+    <div style="font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>🎯 Risk Scoring Engine (GB)</span><span class="chip green" style="font-size:10px">✅ Weekly</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>🔍 Fraud Detection (IF)</span><span class="chip green" style="font-size:10px">✅ Continuous</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span>💰 Income Estimator (GB)</span><span class="chip green" style="font-size:10px">✅ Weekly</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0"><span>📅 Disruption Forecast (Prophet)</span><span class="chip green" style="font-size:10px">✅ Daily</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SAVINGS ══════ -->
 <div class="panel" id="panel-savings">
   <div class="savings-pool">
     <div class="text-sm" style="color:rgba(255,255,255,.7)">Current Savings Pool</div>
     <div class="pool-amount">₹231</div>
-    <div style="font-size:12px;color:rgba(255,255,255,.7)">Week of Mar 16–22 · 5 days accumulated · ₹3/order deduction</div>
-    <div class="divider" style="background:rgba(255,255,255,.2)"></div>
-    <div style="display:flex;gap:24px">
-      <div><div style="font-size:11px;color:rgba(255,255,255,.6)">Pool Rate</div><div style="font-weight:700;color:#fff">₹3/order</div></div>
-      <div><div style="font-size:11px;color:rgba(255,255,255,.6)">Interest Rate</div><div style="font-weight:700;color:#4ade80">4.5% p.a.</div></div>
-      <div><div style="font-size:11px;color:rgba(255,255,255,.6)">Week-end Return</div><div style="font-weight:700;color:#4ade80">₹253.51*</div></div>
-    </div>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">📅 Daily Pool Accumulation</div>
-      <table class="order-table">
-        <thead><tr><th>Day</th><th>Deliveries</th><th>Deduction</th><th>Day's Pool</th><th>Running Total</th></tr></thead>
-        <tbody>
-          <tr><td>Monday</td><td>15</td><td>₹3</td><td>₹45</td><td>₹45</td></tr>
-          <tr><td>Tuesday 🌧️</td><td>5 (disruption)</td><td>₹3</td><td>₹15</td><td>₹60</td></tr>
-          <tr><td>Wednesday</td><td>14</td><td>₹3</td><td>₹42</td><td>₹102</td></tr>
-          <tr><td>Thursday</td><td>17</td><td>₹3</td><td>₹51</td><td>₹153</td></tr>
-          <tr style="background:#f0fdf4"><td><strong>Friday (Today)</strong></td><td><strong>17</strong></td><td>₹3</td><td>₹51</td><td><strong>₹231</strong></td></tr>
-          <tr style="color:var(--text-muted)"><td>Saturday (projected)</td><td>16</td><td>₹3</td><td>₹48</td><td>₹279*</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="card">
-      <div class="card-title">📊 Outcome Scenarios</div>
-      <div class="ai-card" style="background:#f0fdf4;border-color:#bbf7d0">
-        <div style="font-weight:700;color:var(--green-dark);margin-bottom:6px">✅ Scenario A — Clean Week</div>
-        <div class="ai-text">Pool: ₹279 → Service fee (10%): ₹27.90 → Interest: ₹2.41 → <strong>₹253.51 returned</strong></div>
-      </div>
-      <div class="ai-card" style="background:#fff7ed;border-color:#fed7aa">
-        <div style="font-weight:700;color:#c2410c;margin-bottom:6px">🌧️ Scenario B — 1 Disruption (actual)</div>
-        <div class="ai-text">Pool at disruption: ₹60 → Payout: ₹179 (platform reserve) → Week continues → Good outcome</div>
-      </div>
-      <div class="ai-card" style="background:#fef2f2;border-color:#fca5a5">
-        <div style="font-weight:700;color:var(--red);margin-bottom:6px">⛔ Scenario C — No Policy</div>
-        <div class="ai-text">Disruption loss: ₹192 → No payout → Full income lost → Zero protection</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════ CASHBACK ════════ -->
-<div class="panel" id="panel-cashback">
-  <div class="payout-hero" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);margin-bottom:20px">
-    <div style="font-size:13px;opacity:.8;margin-bottom:6px">🎁 Bonus Vaapsi — Your Rewards</div>
-    <div class="payout-amount">₹507.91</div>
-    <div class="payout-tag">Total cashback earned this month via disruption-free weeks</div>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">🎁 Cashback History</div>
-      <div class="cashback-row">
-        <div class="cashback-icon">✅</div>
-        <div class="cashback-info"><div class="cashback-title">Week of Mar 9–15 — Clean Week</div><div class="cashback-date">Pool: ₹283 · Interest: ₹2.44 · Fee: -₹28.30</div></div>
-        <div class="cashback-amt">+₹257.14</div>
-      </div>
-      <div class="cashback-row">
-        <div class="cashback-icon">✅</div>
-        <div class="cashback-info"><div class="cashback-title">Week of Mar 2–8 — Clean Week</div><div class="cashback-date">Pool: ₹264 · Interest: ₹2.27 · Fee: -₹26.40</div></div>
-        <div class="cashback-amt">+₹239.87</div>
-      </div>
-      <div class="cashback-row">
-        <div class="cashback-icon">🌧️</div>
-        <div class="cashback-info"><div class="cashback-title">Week of Feb 23–29 — Disruption</div><div class="cashback-date">1 disruption · Payout: ₹117</div></div>
-        <div class="cashback-amt" style="color:var(--blue)">Protected</div>
-      </div>
-      <div class="cashback-row">
-        <div class="cashback-icon">✅</div>
-        <div class="cashback-info"><div class="cashback-title">Week of Feb 16–22 — Clean Week</div><div class="cashback-date">Pool: ₹270 · Interest: ₹2.32 · Fee: -₹27.00</div></div>
-        <div class="cashback-amt">+₹245.32</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">📈 Cashback Analytics</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-        <div style="background:#ede9fe;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#5b21b6">3</div>
-          <div class="text-sm">Clean Weeks (March)</div>
-        </div>
-        <div style="background:#dbeafe;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:var(--blue)">4.5%</div>
-          <div class="text-sm">Annualized Interest</div>
-        </div>
-        <div style="background:#dcfce7;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:var(--green-dark)">₹508</div>
-          <div class="text-sm">March Cashback</div>
-        </div>
-        <div style="background:#fef3c7;border-radius:12px;padding:14px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#92400e">75%</div>
-          <div class="text-sm">Clean Week Rate</div>
-        </div>
-      </div>
-      <div class="ai-card">
-        <div class="ai-header"><div class="ai-tag">INSIGHT</div></div>
-        <div class="ai-text">GigKavach is <strong>never a pure cost</strong>. Clean weeks return your savings + interest. Disrupted weeks protect your income. You win either way.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════ PERFORMANCE ════════ -->
-<div class="panel" id="panel-performance">
-  <div class="grid-4">
-    <div class="stat-card blue">
-      <div class="stat-icon blue">📦</div>
-      <div class="stat-val">347</div>
-      <div class="stat-label">Deliveries This Month</div>
-      <div class="stat-change up">↑ +28 vs last month</div>
-    </div>
-    <div class="stat-card green">
-      <div class="stat-icon green">⏱️</div>
-      <div class="stat-val">22 min</div>
-      <div class="stat-label">Avg Delivery Time</div>
-      <div class="stat-change up">↓ 2min faster</div>
-    </div>
-    <div class="stat-card amber">
-      <div class="stat-icon amber">💯</div>
-      <div class="stat-val">4.8★</div>
-      <div class="stat-label">Customer Rating</div>
-      <div class="stat-change up">↑ +0.1</div>
-    </div>
-    <div class="stat-card navy">
-      <div class="stat-icon navy">💵</div>
-      <div class="stat-val">₹89</div>
-      <div class="stat-label">Avg Earning / Hour</div>
-      <div class="stat-change up">↑ ₹4 vs avg</div>
-    </div>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">📊 Delivery Efficiency</div>
-      <div style="font-size:13px">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>Acceptance Rate</span>
-          <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end">
-            <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:92%;background:var(--green)"></div></div>
-            <span style="font-weight:700">92%</span>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>On-Time Delivery</span>
-          <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end">
-            <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:87%;background:var(--blue)"></div></div>
-            <span style="font-weight:700">87%</span>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
-          <span>Zone Coverage</span>
-          <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end">
-            <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:78%;background:var(--amber)"></div></div>
-            <span style="font-weight:700">78%</span>
-          </div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:12px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="text-sm">Best Performing Day</span><span style="font-weight:700">Thursday</span></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="text-sm">Best Earning Zone</span><span style="font-weight:700">T. Nagar</span></div>
-        <div style="display:flex;justify-content:space-between"><span class="text-sm">Monthly Gross (proj.)</span><span style="font-weight:700;color:var(--green-dark)">₹21,600</span></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">🏆 Month Summary vs Target</div>
-      <div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="text-sm">Earnings Progress</span><span class="text-sm">₹17,280 / ₹21,600</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--blue)"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:4px"><span class="text-sm">Delivery Target</span><span class="text-sm">347 / 420</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:83%;background:var(--green)"></div></div>
-        <div style="display:flex;justify-content:space-between;margin-top:12px;margin-bottom:4px"><span class="text-sm">Protected Income</span><span class="text-sm">₹465 / ₹1,500 max</span></div>
-        <div class="progress-bar"><div class="progress-fill" style="width:31%;background:var(--amber)"></div></div>
-      </div>
-      <div class="divider"></div>
-      <div class="alert success"><span class="alert-icon">🏆</span><span>Top 15% performer in Velachery zone this month!</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════ TRUST ════════ -->
-<div class="panel" id="panel-trust">
-  <div class="grid-3">
-    <div class="card" style="text-align:center">
-      <div class="card-title">🛡️ Vishwas Score</div>
-      <div class="trust-ring">
-        <div class="trust-inner">
-          <div class="trust-val">90</div>
-          <div class="trust-sub">/ 100</div>
-        </div>
-      </div>
-      <div class="chip green" style="margin-bottom:8px">✅ LOW RISK — Auto-Pay Active</div>
-      <div class="text-sm">Your claims process instantly without manual review</div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">🔍 Fraud Detection Layers</div>
-      <div class="claim-timeline">
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Layer 1 — GPS Anomaly</div>
-            <div class="claim-step-time">Speed OK · No mock location · Road-matching: ✅</div>
-          </div>
-        </div>
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Layer 2 — Activity Verification</div>
-            <div class="claim-step-time">In zone >78% · Idle <12min · Speed 10–40km/h ✅</div>
-          </div>
-        </div>
-        <div class="claim-step done">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Layer 3 — Duplicate Check</div>
-            <div class="claim-step-time">Unique Event_ID · No repeat claims ✅</div>
-          </div>
-        </div>
-        <div class="claim-step">
-          <div class="claim-dot done">✅</div>
-          <div class="claim-info">
-            <div class="claim-step-title">Layer 4 — Policy Validation</div>
-            <div class="claim-step-time">Policy active · Waiting period passed · Within cap ✅</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📊 Trust Score Components</div>
-      <div style="font-size:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>GPS Consistency</span>
-          <div style="display:flex;align-items:center;gap:8px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:95%;background:var(--green)"></div></div><span style="font-weight:700">95%</span></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>Zone Presence</span>
-          <div style="display:flex;align-items:center;gap:8px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:88%;background:var(--green)"></div></div><span style="font-weight:700">88%</span></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
-          <span>Claim History</span>
-          <div style="display:flex;align-items:center;gap:8px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:90%;background:var(--green)"></div></div><span style="font-weight:700">90%</span></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
-          <span>Speed Patterns</span>
-          <div style="display:flex;align-items:center;gap:8px"><div class="progress-bar" style="width:80px"><div class="progress-fill" style="width:87%;background:var(--green)"></div></div><span style="font-weight:700">87%</span></div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="chip green">🏆 Eligible for platform partner fast-track</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.6)">Week of Mar 16–22 · 5 days · ₹3/order</div>
+    <div class="divider" style="background:rgba(255,255,255,.18)"></div>
+    <div style="display:flex;gap:16px">
+      <div><div style="font-size:10px;color:rgba(255,255,255,.55)">Pool Rate</div><div style="font-weight:700;color:#fff">₹3/order</div></div>
+      <div><div style="font-size:10px;color:rgba(255,255,255,.55)">Interest</div><div style="font-weight:700;color:var(--green-k)">4.5% p.a.</div></div>
+      <div><div style="font-size:10px;color:rgba(255,255,255,.55)">Week-end</div><div style="font-weight:700;color:var(--green-k)">₹253.51*</div></div>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-title">⚠️ Fraud Score Response Guide</div>
-    <table class="order-table">
-      <thead><tr><th>Score Range</th><th>Risk Level</th><th>Action</th><th>Rider Message</th></tr></thead>
-      <tbody>
-        <tr style="background:#f0fdf4"><td>0–30</td><td><span class="chip green">✅ LOW RISK</span></td><td>Auto-pay immediately</td><td>"₹179 credited to your UPI"</td></tr>
-        <tr><td>31–60</td><td><span class="chip amber">⚡ MEDIUM</span></td><td>Pay + audit log</td><td>"₹179 credited — session logged"</td></tr>
-        <tr><td>61–85</td><td><span class="chip red">🔴 HIGH</span></td><td>24-hr hold, review</td><td>"Claim under review — 24hrs"</td></tr>
-        <tr><td>86–100</td><td><span class="chip purple">🚫 CRITICAL</span></td><td>Block + flag</td><td>"Additional verification required"</td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:12px" class="ai-card">
-      <div class="ai-header"><div class="ai-tag">ISOLATION FOREST — UNSUPERVISED ML</div></div>
-      <div class="ai-text">No labelled fraud examples needed at launch. Model bootstraps on GPS anomaly detection. As claims accumulate, supervised models augment detection accuracy. Your score: <strong>22/100 (LOW RISK)</strong> — top 10% most trusted riders.</div>
+    <div class="card-title">📅 Daily Accumulation</div>
+    <div class="table-wrap">
+      <table class="order-table">
+        <thead><tr><th>Day</th><th>Orders</th><th>/Order</th><th>Day Pool</th><th>Running</th></tr></thead>
+        <tbody>
+          <tr><td>Monday</td><td>15</td><td>₹3</td><td>₹45</td><td>₹45</td></tr>
+          <tr><td>Tue 🌧️</td><td>5</td><td>₹3</td><td>₹15</td><td>₹60</td></tr>
+          <tr><td>Wednesday</td><td>14</td><td>₹3</td><td>₹42</td><td>₹102</td></tr>
+          <tr><td>Thursday</td><td>17</td><td>₹3</td><td>₹51</td><td>₹153</td></tr>
+          <tr style="background:#f0fdf4"><td><strong>Friday ✓</strong></td><td>17</td><td>₹3</td><td>₹51</td><td><strong>₹231</strong></td></tr>
+          <tr style="color:var(--muted)"><td>Sat (proj.)</td><td>16</td><td>₹3</td><td>₹48</td><td>₹279*</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Week Outcome Scenarios</div>
+    <div class="ai-card" style="background:#f0fdf4;border-color:#bbf7d0">
+      <div style="font-weight:700;color:var(--green-dark);margin-bottom:4px">✅ Clean Week</div>
+      <div class="ai-text">Pool ₹279 → Fee -₹27.90 → Interest +₹2.41 → <strong>₹253.51 returned to wallet</strong></div>
+    </div>
+    <div class="ai-card" style="background:#fff7ed;border-color:#fed7aa">
+      <div style="font-weight:700;color:#c2410c;margin-bottom:4px">🌧️ Disruption Week (actual)</div>
+      <div class="ai-text">Pool ₹60 → Payout ₹179 from platform reserve → Income protected</div>
+    </div>
+    <div class="ai-card" style="background:#fef2f2;border-color:#fca5a5">
+      <div style="font-weight:700;color:var(--red);margin-bottom:4px">⛔ No Policy</div>
+      <div class="ai-text">Disruption loss ₹192 → No payout → Full income lost</div>
     </div>
   </div>
 </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
-</div><!-- /app -->
+<!-- ══════ CASHBACK ══════ -->
+<div class="panel" id="panel-cashback">
+  <div class="payout-hero" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
+    <div style="font-size:12px;opacity:.8;margin-bottom:6px">🎁 Bonus Vaapsi — March Total</div>
+    <div class="payout-amount">₹507.91</div>
+    <div class="payout-tag">Earned from disruption-free weeks this month</div>
+  </div>
 
-<!-- Voice FAB -->
+  <div class="card">
+    <div class="card-title">🎁 Cashback History</div>
+    <div class="cashback-row"><div class="cashback-icon">✅</div><div class="cashback-info"><div class="cashback-title">Mar 9–15 — Clean Week</div><div class="cashback-date">Pool ₹283 · Fee -₹28.30 · Interest +₹2.44</div></div><div class="cashback-amt">+₹257</div></div>
+    <div class="cashback-row"><div class="cashback-icon">✅</div><div class="cashback-info"><div class="cashback-title">Mar 2–8 — Clean Week</div><div class="cashback-date">Pool ₹264 · Fee -₹26.40 · Interest +₹2.27</div></div><div class="cashback-amt">+₹240</div></div>
+    <div class="cashback-row"><div class="cashback-icon">🌧️</div><div class="cashback-info"><div class="cashback-title">Feb 23–29 — Disruption</div><div class="cashback-date">1 disruption · Payout: ₹117</div></div><div class="cashback-amt" style="color:var(--blue)">Protected</div></div>
+    <div class="cashback-row"><div class="cashback-icon">✅</div><div class="cashback-info"><div class="cashback-title">Feb 16–22 — Clean Week</div><div class="cashback-date">Pool ₹270 · Fee -₹27.00 · Interest +₹2.32</div></div><div class="cashback-amt">+₹245</div></div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div style="background:#ede9fe;border-radius:12px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:#5b21b6">3</div><div class="text-sm">Clean Weeks</div></div>
+    <div style="background:#dcfce7;border-radius:12px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:800;color:var(--green-dark)">75%</div><div class="text-sm">Clean Week Rate</div></div>
+  </div>
+
+  <div class="ai-card">
+    <div class="ai-header"><div class="ai-tag">INSIGHT</div></div>
+    <div class="ai-text">GigKavach is <strong>never a pure cost</strong>. Clean weeks return savings + interest. Disrupted weeks protect income. <strong>You win either way.</strong></div>
+  </div>
+</div>
+
+<!-- ══════ PERFORMANCE ══════ -->
+<div class="panel" id="panel-performance">
+  <div class="grid-2">
+    <div class="stat-card blue"><div class="stat-icon blue">📦</div><div class="stat-val">347</div><div class="stat-label">Deliveries (Month)</div><div class="stat-change up">↑ +28</div></div>
+    <div class="stat-card green"><div class="stat-icon green">⏱️</div><div class="stat-val">22m</div><div class="stat-label">Avg Delivery Time</div><div class="stat-change up">↓ 2min faster</div></div>
+    <div class="stat-card amber"><div class="stat-icon amber">💯</div><div class="stat-val">4.8★</div><div class="stat-label">Customer Rating</div><div class="stat-change up">↑ +0.1</div></div>
+    <div class="stat-card navy"><div class="stat-icon navy">💵</div><div class="stat-val">₹89</div><div class="stat-label">Avg / Hour</div><div class="stat-change up">↑ ₹4 above avg</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Efficiency Metrics</div>
+    <div style="font-size:11px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">Acceptance Rate</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:92%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">92%</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">On-Time Delivery</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:87%;background:var(--blue)"></div></div><span style="font-weight:700;width:28px">87%</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="flex:1">Zone Coverage</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:78%;background:var(--amber)"></div></div><span style="font-weight:700;width:28px">78%</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏆 Monthly Targets</div>
+    <div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="text-sm">Earnings ₹17,280 / ₹21,600</span><span style="font-size:11px;font-weight:700">80%</span></div><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--blue)"></div></div></div>
+    <div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="text-sm">Deliveries 347 / 420</span><span style="font-size:11px;font-weight:700">83%</span></div><div class="progress-bar"><div class="progress-fill" style="width:83%;background:var(--green)"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="text-sm">Protected Income ₹465 / ₹1,500</span><span style="font-size:11px;font-weight:700">31%</span></div><div class="progress-bar"><div class="progress-fill" style="width:31%;background:var(--amber)"></div></div></div>
+    <div class="divider"></div>
+    <div class="alert success"><span class="alert-icon">🏆</span><span>Top 15% performer in Velachery zone this month!</span></div>
+  </div>
+</div>
+
+<!-- ══════ TRUST ══════ -->
+<div class="panel" id="panel-trust">
+  <div class="card" style="text-align:center">
+    <div class="card-title" style="justify-content:center">🛡️ Vishwas Score</div>
+    <div class="trust-ring"><div class="trust-inner"><div class="trust-val">90</div><div class="trust-sub">/ 100</div></div></div>
+    <div class="chip green" style="margin-bottom:8px">✅ LOW RISK — Auto-Pay Active</div>
+    <div class="text-sm">Claims process instantly without manual review</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 4-Layer Fraud Detection</div>
+    <div class="claim-timeline">
+      <div class="claim-step done"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">Layer 1 — GPS Anomaly</div><div class="claim-step-time">Speed OK · No mock location · Road-matching ✅</div></div></div>
+      <div class="claim-step done"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">Layer 2 — Activity Verification</div><div class="claim-step-time">In zone >78% · Idle &lt;12min · Speed 10–40km/h ✅</div></div></div>
+      <div class="claim-step done"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">Layer 3 — Duplicate Check</div><div class="claim-step-time">Unique Event_ID · No repeat claims ✅</div></div></div>
+      <div class="claim-step"><div class="claim-dot done">✅</div><div class="claim-info"><div class="claim-step-title">Layer 4 — Policy Validation</div><div class="claim-step-time">Policy active · Waiting period passed ✅</div></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 Score Components</div>
+    <div style="font-size:11px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">GPS Consistency</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:95%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">95%</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">Zone Presence</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:88%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">88%</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="flex:1">Claim History</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:90%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">90%</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="flex:1">Speed Patterns</span><div class="progress-bar" style="width:80px;margin:0"><div class="progress-fill" style="width:87%;background:var(--green)"></div></div><span style="font-weight:700;width:28px">87%</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="chip green">🏆 Top 10% most trusted riders</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚠️ Fraud Response Guide</div>
+    <div class="table-wrap">
+      <table class="order-table">
+        <thead><tr><th>Score</th><th>Risk Level</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr style="background:#f0fdf4"><td>0–30</td><td><span class="chip green" style="font-size:10px">✅ LOW</span></td><td style="font-size:11px">Auto-pay instantly</td></tr>
+          <tr><td>31–60</td><td><span class="chip amber" style="font-size:10px">⚡ MEDIUM</span></td><td style="font-size:11px">Pay + audit log</td></tr>
+          <tr><td>61–85</td><td><span class="chip red" style="font-size:10px">🔴 HIGH</span></td><td style="font-size:11px">24-hr hold, review</td></tr>
+          <tr><td>86–100</td><td><span class="chip purple" style="font-size:10px">🚫 CRITICAL</span></td><td style="font-size:11px">Block + flag account</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ai-card" style="margin-top:10px">
+      <div class="ai-header"><div class="ai-tag">ISOLATION FOREST</div></div>
+      <div class="ai-text">No labelled fraud examples needed at launch. Model bootstraps on GPS anomaly detection. Your score: <strong>22/100 (LOW RISK)</strong> — top 10% trusted riders.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="bn-dashboard" onclick="showPanel('dashboard',null,'dashboard')">
+    <span class="bnav-icon">📊</span><span class="bnav-label">Earnings</span>
+  </button>
+  <button class="bnav-item" id="bn-insurance" onclick="showPanel('insurance',null,'insurance')">
+    <span class="bnav-icon">🛡️</span><span class="bnav-label">Kavach</span>
+    <div class="bnav-dot"></div>
+  </button>
+  <button class="bnav-item" id="bn-risk" onclick="showPanel('risk',null,'risk')">
+    <span class="bnav-icon">🌦️</span><span class="bnav-label">Risk</span>
+  </button>
+  <button class="bnav-item" id="bn-map" onclick="showPanel('map',null,'map')">
+    <span class="bnav-icon">🗺️</span><span class="bnav-label">Map</span>
+  </button>
+  <button class="bnav-item" id="bn-savings" onclick="showPanel('savings',null,'savings')">
+    <span class="bnav-icon">💰</span><span class="bnav-label">Savings</span>
+  </button>
+</nav>
+
+<!-- VOICE FAB -->
 <button class="voice-fab" id="voiceFab" onclick="toggleVoice()">🎤</button>
 <div class="voice-tooltip" id="voiceTooltip">
-  <strong>Bhasha Sathi</strong> — Voice Assistant<br>
-  <span style="color:rgba(255,255,255,.7);font-size:12px">Listening in Tamil...</span>
+  <strong>Bhasha Sathi</strong> — Voice<br>
+  <span style="color:rgba(255,255,255,.7);font-size:11px">Listening in Tamil...</span>
   <div class="voice-lang">
     <div class="lang-chip active">தமிழ்</div>
     <div class="lang-chip">हिन्दी</div>
@@ -1718,118 +984,87 @@
 </div>
 
 <script>
-  // ── NAVIGATION ──
-  const titles = {
-    dashboard: 'Aay Darpan — Earnings Dashboard',
-    insurance: 'Suraksha Kavach — Smart Insurance',
-    claims: 'Swayam Claim — Auto Claim System',
-    risk: 'Jokhim Soochak — Risk Intelligence',
-    map: 'Surakshit Kshetra — Safe Zone Map',
-    orders: 'Sahi Chayan — Smart Order Selection',
-    ai: 'AI Margdarshak — Intelligence Engine',
-    savings: 'SurakshaPay — Micro Savings',
-    cashback: 'Bonus Vaapsi — Cashback Rewards',
-    performance: 'Kaarya Pradarshan — Performance',
-    trust: 'Vishwas Score — Trust & Fraud Detection',
-  };
+const titles={
+  dashboard:'Aay Darpan — Earnings',insurance:'Suraksha Kavach',
+  claims:'Swayam Claim',risk:'Jokhim Soochak',map:'Surakshit Kshetra',
+  orders:'Sahi Chayan',ai:'AI Margdarshak',savings:'SurakshaPay',
+  cashback:'Bonus Vaapsi',performance:'Kaarya Pradarshan',trust:'Vishwas Score'
+};
 
-  function showPanel(id, el) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('panel-' + id).classList.add('active');
-    if (el) el.classList.add('active');
-    document.getElementById('topbar-title').textContent = titles[id] || id;
-  }
+function showPanel(id,drawerEl,bnId){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('topbar-title').textContent=titles[id]||id;
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(drawerEl)drawerEl.classList.add('active');
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const bn=document.getElementById('bn-'+(bnId||id));
+  if(bn)bn.classList.add('active');
+  closeDrawer();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-  // ── ZONE MAP GENERATION ──
-  function buildMap() {
-    const grid = document.getElementById('mapGrid');
-    if (!grid) return;
-    const types = ['safe','safe','safe','safe','moderate','moderate','danger','extreme'];
-    // Predefined realistic pattern
-    const pattern = [
-      'safe','safe','safe','moderate','safe','safe','safe','safe',
-      'safe','safe','moderate','moderate','safe','safe','danger','safe',
-      'safe','moderate','moderate','safe','safe','moderate','danger','extreme',
-      'moderate','moderate','safe','safe','danger','danger','extreme','extreme',
-      'safe','safe','moderate','danger','danger','moderate','safe','safe',
-      'safe','safe','safe','moderate','moderate','safe','safe','safe',
-    ];
-    pattern.forEach((type, i) => {
-      const cell = document.createElement('div');
-      cell.className = 'map-cell ' + type;
-      // Mark current zone
-      if (i === 26) cell.title = '📍 Your Zone (Velachery)';
-      grid.appendChild(cell);
-    });
-  }
-  buildMap();
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
 
-  // ── WEATHER SIMULATION ──
-  function simulateWeather() {
-    const badge = document.getElementById('weather-badge');
-    const conditions = [
-      {cls:'safe', text:'🌤️ Clear · 31°C · AQI 68'},
-      {cls:'safe', text:'⛅ Partly Cloudy · 30°C · AQI 72'},
-      {cls:'moderate', text:'🌦️ Light Rain · 28°C · AQI 85'},
-    ];
-    let i = 0;
-    setInterval(() => {
-      const c = conditions[i % conditions.length];
-      badge.className = 'weather-badge ' + c.cls;
-      badge.textContent = c.text;
-      i++;
-    }, 8000);
-  }
-  simulateWeather();
+// Map
+function buildMap(){
+  const g=document.getElementById('mapGrid');
+  if(!g)return;
+  const p=['safe','safe','safe','moderate','safe','safe','safe','safe','safe','safe','moderate','moderate','safe','safe','danger','safe','safe','moderate','moderate','safe','safe','moderate','danger','extreme','moderate','moderate','safe','safe','danger','danger','extreme','extreme','safe','safe','moderate','danger','danger','moderate','safe','safe','safe','safe','safe','moderate','moderate','safe','safe','safe'];
+  p.forEach((t,i)=>{const c=document.createElement('div');c.className='map-cell '+t;if(i===26)c.title='📍 Velachery';g.appendChild(c);});
+}
+buildMap();
 
-  // ── VOICE ASSISTANT ──
-  let voiceActive = false;
-  function toggleVoice() {
-    voiceActive = !voiceActive;
-    const fab = document.getElementById('voiceFab');
-    const tooltip = document.getElementById('voiceTooltip');
-    fab.classList.toggle('listening', voiceActive);
-    fab.textContent = voiceActive ? '🔴' : '🎤';
-    tooltip.classList.toggle('show', voiceActive);
-    if (voiceActive) {
-      setTimeout(() => {
-        voiceActive = false;
-        fab.classList.remove('listening');
-        fab.textContent = '🎤';
-        tooltip.classList.remove('show');
-      }, 4000);
-    }
-  }
+// Weather
+function simWeather(){
+  const b=document.getElementById('weather-badge');
+  const c=[{cls:'safe',t:'🌤️ 31°C'},{cls:'safe',t:'⛅ 30°C'},{cls:'moderate',t:'🌦️ 28°C'}];
+  let i=0;setInterval(()=>{const x=c[i%c.length];b.className='weather-pill '+x.cls;b.textContent=x.t;i++;},8000);
+}
+simWeather();
 
-  // ── NOTIFICATIONS ──
-  let notifOpen = false;
-  function toggleNotif() {
-    notifOpen = !notifOpen;
-    document.getElementById('notif-panel').style.display = notifOpen ? 'block' : 'none';
-  }
+// Voice
+let vA=false;
+function toggleVoice(){
+  vA=!vA;
+  const f=document.getElementById('voiceFab'),t=document.getElementById('voiceTooltip');
+  f.classList.toggle('listening',vA);f.textContent=vA?'🔴':'🎤';
+  t.classList.toggle('show',vA);
+  if(vA)setTimeout(()=>{vA=false;f.classList.remove('listening');f.textContent='🎤';t.classList.remove('show');},4000);
+}
 
-  // ── LIVE DISRUPTION SIMULATION ──
-  function simDisruption() {
-    setTimeout(() => {
-      const alert = document.createElement('div');
-      alert.className = 'alert warning';
-      alert.style.cssText = 'position:fixed;bottom:90px;right:24px;z-index:500;max-width:300px;animation:fadeIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.15)';
-      alert.innerHTML = '<span class="alert-icon">🌧️</span><span><strong>Rain Alert:</strong> Velachery zone monitoring active. No disruption threshold breached yet.</span>';
-      document.body.appendChild(alert);
-      setTimeout(() => alert.remove(), 5000);
-    }, 12000);
-  }
-  simDisruption();
+// Notif
+let nO=false;
+function toggleNotif(){
+  nO=!nO;document.getElementById('notifPanel').classList.toggle('show',nO);
+}
+document.addEventListener('click',e=>{
+  if(nO&&!e.target.closest('.notif-btn')&&!e.target.closest('#notifPanel')){nO=false;document.getElementById('notifPanel').classList.remove('show');}
+});
 
-  // ── PROGRESS BARS ANIMATION ──
-  window.addEventListener('load', () => {
-    document.querySelectorAll('.progress-fill').forEach(bar => {
-      const w = bar.style.width;
-      bar.style.width = '0';
-      setTimeout(() => { bar.style.width = w; }, 300);
-    });
-  });
+// Live alert toast
+setTimeout(()=>{
+  const a=document.createElement('div');
+  a.className='alert warning';
+  a.style.cssText='position:fixed;bottom:calc(var(--bottom-h)+12px);left:10px;right:68px;z-index:189;box-shadow:0 4px 18px rgba(0,0,0,.15);border-radius:12px;animation:fadeUp .3s ease';
+  a.innerHTML='<span class="alert-icon">🌧️</span><span style="font-size:11px"><strong>Rain Alert:</strong> Velachery monitoring active. No threshold breached.</span>';
+  document.body.appendChild(a);
+  setTimeout(()=>a.remove(),5000);
+},12000);
+
+// Progress animation
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.progress-fill').forEach(b=>{const w=b.style.width;b.style.width='0';setTimeout(()=>{b.style.width=w;},400);});
+});
 </script>
 </body>
 </html>
